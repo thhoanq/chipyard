@@ -61,29 +61,14 @@ class BringupArty100TConfig extends Config(
   new chipyard.ChipBringupHostConfig)
 
 // custom SoC
-class FPGACustomNoC extends Config(
+class FPGACustomSoC extends Config(
   new WithArty100TTweaks ++
-  new constellation.soc.WithSbusNoC(constellation.protocol.SimpleTLNoCParams(
-    constellation.protocol.DiplomaticNetworkNodeMapping(
-      inNodeMapping = ListMap(
-        "Core 0" -> 1, "Core 1" -> 2,
-        "Core 2" -> 4, "Core 3" -> 5,
-        "serial_tl" -> 0),
-      outNodeMapping = ListMap(
-        "system[0]" -> 3,
-        "pbus" -> 0)),
-    nocParams = NoCParams(
-      topology = Mesh2D(nX = 3, nY = 2),
-      //topology = BidirectionalTorus1D(6),
-      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
-      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 5, 2))
-  )) ++
-    new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-    new freechips.rocketchip.subsystem.WithDefaultMemPort ++
-    new freechips.rocketchip.subsystem.WithNoMemPort ++
-    new chipyard.config.WithUART(address = 0x10000000) ++
-    new chipyard.config.WithNoUART ++
-    new testchipip.soc.WithNoScratchpads ++
-    new freechips.rocketchip.rocket.WithNHugeCores(4) ++
-    new chipyard.config.AbstractConfig
+  new chipyard.config.WithBroadcastManager ++ // no l2
+  new chipyard.DualCoreNoC
+)
+
+class FPGATestSoC extends Config(
+  new WithArty100TTweaks ++
+  new chipyard.config.WithBroadcastManager ++
+  new chipyard.DualCoreSoC
 )

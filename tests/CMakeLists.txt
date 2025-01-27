@@ -88,6 +88,9 @@ add_executable(hello hello.c)
 add_executable(mt-hello mt-hello.c)
 add_executable(symmetric symmetric.c)
 add_executable(test test.c)
+add_executable(mt-matmul mt-matmul.c)
+#add_executable(klein klein.c)
+#add_executable(blake2s blake2s.c)
 
 #################################
 # Disassembly
@@ -127,6 +130,9 @@ add_dump_target(hello)
 add_dump_target(mt-hello)
 add_dump_target(symmetric)
 add_dump_target(test)
+add_dump_target(mt-matmul)
+#add_dump_target(klein)
+#add_dump_target(blake2s)
 
 # Add custom command to generate spiflash.img from spiflash.py
 add_custom_command(
