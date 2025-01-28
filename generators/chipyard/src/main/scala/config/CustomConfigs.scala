@@ -37,14 +37,14 @@ class GCDTLBlackBoxRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: GCDTLBlackBoxRocketConfig
 
-class TestSoC extends Config(
-  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = false) ++
-  new freechips.rocketchip.rocket.WithNCustomCores(2, withFPU = true, lengthFPU = 32) ++
-  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = true, lengthFPU = 64) ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  //new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=4, capacityKB=128) ++
-  new chipyard.config.AbstractConfig
-)
+//class TestSoC extends Config(
+//  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = false) ++
+//  new freechips.rocketchip.rocket.WithNCustomCores(2, withFPU = true, lengthFPU = 32) ++
+//  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = true, lengthFPU = 64) ++
+//  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+//  //new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=4, capacityKB=128) ++
+//  new chipyard.config.AbstractConfig
+//)
 
 class CustomSoC extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
