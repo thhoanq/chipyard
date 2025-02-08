@@ -33,11 +33,11 @@ class WithArty100TUARTTSI extends HarnessBinder({
       ath.xdc.addIOB(io)
     } }
 
-    ath.other_leds(1) := port.io.dropped
-    ath.other_leds(9) := port.io.tsi2tl_state(0)
-    ath.other_leds(10) := port.io.tsi2tl_state(1)
-    ath.other_leds(11) := port.io.tsi2tl_state(2)
-    ath.other_leds(12) := port.io.tsi2tl_state(3)
+//    ath.other_leds(1) := port.io.dropped
+//    ath.other_leds(9) := port.io.tsi2tl_state(0)
+//    ath.other_leds(10) := port.io.tsi2tl_state(1)
+//    ath.other_leds(11) := port.io.tsi2tl_state(2)
+//    ath.other_leds(12) := port.io.tsi2tl_state(3)
   }
 })
 
@@ -104,24 +104,32 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
 })
 
 // Maps the UART device to the on-board USB-UART
-class WithArty100TUART(rxdPin: String = "A9", txdPin: String = "D10") extends HarnessBinder({
+class WithArty100TUART(uartMappings: Seq[(String, String, Int)]) extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
-    val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-    val harnessIO = IO(chiselTypeOf(port.io)).suggestName("uart")
-    harnessIO <> port.io
-    val packagePinsWithPackageIOs = Seq(
-      (rxdPin, IOPin(harnessIO.rxd)),
-      (txdPin, IOPin(harnessIO.txd)))
-    packagePinsWithPackageIOs foreach { case (pin, io) => {
-      ath.xdc.addPackagePin(io, pin)
-      ath.xdc.addIOStandard(io, "LVCMOS33")
-      ath.xdc.addIOB(io)
-    } }
+    uartMappings.foreach { case (rxdPin, txdPin, uartNo) =>
+      if (port.uartNo == uartNo) {
+        val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+        val harnessIO = IO(chiselTypeOf(port.io)).suggestName(s"uart_${uartNo}")
+        harnessIO <> port.io
+        val packagePinsWithPackageIOs = Seq(
+          (rxdPin, IOPin(harnessIO.rxd)),
+          (txdPin, IOPin(harnessIO.txd))
+        )
+        packagePinsWithPackageIOs.foreach { case (pin, io) =>
+          ath.xdc.addPackagePin(io, pin)
+          ath.xdc.addIOStandard(io, "LVCMOS33")
+          ath.xdc.addIOB(io)
+        }
+      }
+    }
   }
 })
 
 // Maps the UART device to PMOD JD pins 3/7
-class WithArty100TPMODUART extends WithArty100TUART("G2", "F3")
+class WithArty100TPMODUARTs extends WithArty100TUART(Seq(
+  ("G2", "F3", 0),
+  ("D3", "H2", 1)
+))
 
 class WithArty100TJTAG extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: JTAGPort, chipId: Int) => {
@@ -145,3 +153,21 @@ class WithArty100TJTAG extends HarnessBinder({
     } }
   }
 })
+
+// Map the GPIO to sw and led
+//class WithArty100TGPIO(gpioPins: Seq[String] = Seq("H5", "J9", "T9", "T10", "A8", "C11", "C10", "A10"))
+//  extends HarnessBinder({
+//    case (th: HasHarnessInstantiators, port: GPIOPort, chipId: Int) => {
+//      val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+//      val harnessIO = IO(chiselTypeOf(port.io)).suggestName(s"gpio_${port.gpioId}")
+//      harnessIO <> port.io
+//
+//      val packagePinsWithIOs = gpioPins.zip(Seq.fill(gpioPins.length)(IOPin(harnessIO)))
+//
+//      packagePinsWithIOs.foreach { case (pin, io) => {
+//        ath.xdc.addPackagePin(io, pin)
+//        ath.xdc.addIOStandard(io, "LVCMOS33")
+//        ath.xdc.addIOB(io)
+//      }}
+//    }
+//  })

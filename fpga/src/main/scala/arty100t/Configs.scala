@@ -28,7 +28,7 @@ class WithNoDesignKey extends Config((site, here, up) => {
 // By default, this uses the on-board USB-UART for the TSI-over-UART link
 // The PMODUART HarnessBinder maps the actual UART device to JD pin
 class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
-  new WithArty100TPMODUART ++
+  new WithArty100TPMODUARTs ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithArty100TJTAG ++
@@ -64,11 +64,5 @@ class BringupArty100TConfig extends Config(
 class FPGACustomSoC extends Config(
   new WithArty100TTweaks ++
   new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.DualCoreNoC
-)
-
-class FPGATestSoC extends Config(
-  new WithArty100TTweaks ++
-  new chipyard.config.WithBroadcastManager ++
-  new chipyard.DualCoreSoC
+  new chipyard.SingleCoreSoC
 )

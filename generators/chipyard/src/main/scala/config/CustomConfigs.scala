@@ -20,9 +20,9 @@ class PeripheralConfig(gpio: Int = 8) extends Config(
   new chipyard.config.WithI2C(address = 0x10005000) ++
   new chipyard.config.WithSPI(address = 0x10004000) ++
   new chipyard.config.WithSPI(address = 0x10003000) ++
-  new chipyard.config.WithGPIO(address = 0x10002000, width = gpio) ++
+//  new chipyard.config.WithGPIO(address = 0x10002000, width = gpio) ++
   new chipyard.config.WithUART(address = 0x10001000) ++
-  //new chipyard.config.WithUART(address = 0x10000000) ++
+  new chipyard.config.WithUART(address = 0x10000000) ++
   new freechips.rocketchip.subsystem.WithDefaultMemPort
 )
 
@@ -36,15 +36,6 @@ class GCDTLBlackBoxRocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: GCDTLBlackBoxRocketConfig
-
-//class TestSoC extends Config(
-//  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = false) ++
-//  new freechips.rocketchip.rocket.WithNCustomCores(2, withFPU = true, lengthFPU = 32) ++
-//  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = true, lengthFPU = 64) ++
-//  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-//  //new freechips.rocketchip.subsystem.WithInclusiveCache(nWays=4, capacityKB=128) ++
-//  new chipyard.config.AbstractConfig
-//)
 
 class CustomSoC extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
@@ -62,9 +53,13 @@ class SingleCoreSoC extends Config(
     new freechips.rocketchip.subsystem.WithNoMemPort ++
     new chipyard.config.WithNoUART ++
     new testchipip.soc.WithNoScratchpads ++
-    new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+    new freechips.rocketchip.rocket.WithNMedCores(1) ++
     new chipyard.config.AbstractConfig
 )
+
+// DOC include start TestConfigSoC
+
+// DOC include end TestConfigSoC
 
 class DualCoreSoC extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
