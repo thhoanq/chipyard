@@ -49,16 +49,38 @@ class CustomSoC extends Config(
 
 class SingleCoreSoC extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-    new PeripheralConfig(8) ++
-    new freechips.rocketchip.subsystem.WithNoMemPort ++
-    new chipyard.config.WithNoUART ++
-    new testchipip.soc.WithNoScratchpads ++
-    new freechips.rocketchip.rocket.WithNMedCores(1) ++
-    new chipyard.config.AbstractConfig
+  new PeripheralConfig(1) ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new chipyard.config.WithNoUART ++
+  new testchipip.soc.WithNoScratchpads ++
+  new freechips.rocketchip.rocket.WithNMedCores(1) ++
+  new chipyard.config.AbstractConfig
 )
 
 // DOC include start TestConfigSoC
-
+class QuadCoreSoC extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.SimpleTLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "Core 0" -> 0, "Core 1" -> 1,
+        "Core 2" -> 3, "Core 3" -> 4,
+        "serial_tl" -> 2),
+      outNodeMapping = ListMap(
+        "system[0]" -> 2,
+        "pbus" -> 2)),
+    nocParams = NoCParams(
+      topology = BidirectionalTorus1D(5),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(BidirectionalTorus1DShortestRouting(), 5, 2))
+  )) ++
+  new freechips.rocketchip.subsystem.WithDefaultMemPort ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.rocket.WithRV32 ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new testchipip.soc.WithNoScratchpads ++
+  new freechips.rocketchip.rocket.WithNSmallCores(4) ++
+  new chipyard.config.AbstractConfig
+)
 // DOC include end TestConfigSoC
 
 class DualCoreSoC extends Config(
