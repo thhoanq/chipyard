@@ -65,5 +65,5 @@ class BringupArty100TConfig extends Config(
 class FPGACustomSoC extends Config(
   new WithArty100TTweaks ++
   new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.QuadCoreSoC
+  new chipyard.CustomSoC
 )

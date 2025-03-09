@@ -53,8 +53,12 @@ class blake2s extends BlackBox with HasBlackBoxResource {
 
 // DOC include start: BLAKE2S router
 class BLAKE2STL(params: BLAKE2SParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
-  val device = new SimpleDevice("blake2s", Seq("customNoC,blake2s"))
-  val node = TLRegisterNode(Seq(AddressSet(params.address, 0xfff)), device, "reg/control", beatBytes=beatBytes)
+  val device = new SimpleDevice("blake2s", Seq("deslab,blake2s"))
+  val node = TLRegisterNode(
+    address = Seq(AddressSet(params.address, 0xfff)),
+    device = device,
+    deviceKey =  "reg/control",
+    beatBytes = beatBytes)
 
   override lazy val module = new BLAKE2SImpl
   class BLAKE2SImpl extends Impl {
@@ -108,7 +112,6 @@ trait CanHavePeripheryBLAKE2S { this: BaseSubsystem =>
 
   private val pbus = locateTLBusWrapper(PBUS)
 
-  // Only build if we are using the TL (nonAXI4) version
   p(BLAKE2SKey) match {
     case Some(params) => {
       val blake2s = {

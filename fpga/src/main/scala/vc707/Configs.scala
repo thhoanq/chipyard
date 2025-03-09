@@ -65,6 +65,11 @@ class RocketVC707Config extends Config (
   new chipyard.RocketConfig
 )
 
+class CustomVC707Config extends Config (
+  new WithVC707Tweaks ++
+  new chipyard.QuadCoreRing
+)
+
 class BoomVC707Config extends Config (
   new WithFPGAFrequency(50) ++
   new WithVC707Tweaks ++
