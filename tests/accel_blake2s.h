@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "mmio.h"
 
-#define BLAKE2S_TRIGGER   0x10007000
-#define BLAKE2S_DATA_A    0x10007004
-#define BLAKE2S_DATA_B    0x10007008
-#define BLAKE2S_DATA_C    0x1000700C
+#define BLAKE2S_TRIGGER   0x00006400
+#define BLAKE2S_DATA_A    0x00006404
+#define BLAKE2S_DATA_B    0x00006408
+#define BLAKE2S_DATA_C    0x0000640C
 
 #define BLAKE2S_ADDR_CTRL     0x08
 #define BLAKE2S_ADDR_STATUS   0x09
@@ -85,13 +85,3 @@ void blake2s_test_RFC_7693(void)
   }
   printf("\r\nExpected: 508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982\r\n");
 }
-
-//int main(void) {
-//  printf("Hello world\r\n");
-//
-//  // test blake2s
-//  blake2s_test_empty_message();
-//  blake2s_test_RFC_7693();
-//
-//  return 0;
-//}

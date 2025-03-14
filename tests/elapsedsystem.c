@@ -9,6 +9,7 @@
 #include "accel_present.h"
 #include "accel_dmpresent.h"
 //#include "accel_sha3.h"
+#include "accel_klein.h"
 
 //#include "prince_soft.h"
 //#include "chacha_soft.h"
@@ -23,24 +24,30 @@ int main(void) {
   printf("    | |_| | |___ ___) | |___ / ___ \\| |_) |\n");
   printf("    |____/|_____|____/|_____/_/   \\_\\____/ \n");
   printf("\n");
-  printf("  Dual-Core RISC-V 64-bit - A Chipyard project\n");
-  printf("  with Lightweight Cryptography Accelerators ...\n");
+  printf("  Quad-Core RISC-V 64-bit - A Chipyard project\n");
+  printf("  with NoC and Lightweight Cryptography Accelerators ...\n");
 
   printf("\nRISC-V program started, hello there!\n\n");
 
 
 
+  // Klein dev here <=====================================
+  klein_test_encryption_elapsed();
+  klein_test_decryption_elapsed();
+
+  klein_test_software();
+
   // Prince dev here <=====================================
-  prince_test_elapsed();
+//  prince_test_elapsed();
 
   // ChaCha dev here <======================================
-  chacha_test_elapsed();
+//  chacha_test_elapsed();
 
   // PRESENT dev here <=====================================
-  present_test_elapsed();
+//  present_test_elapsed();
 
   // DM-PRESENT dev here <===================================
-  dmpresent_test_elapsed();
+//  dmpresent_test_elapsed();
 
   // SHA3 dev here <=========================================
 //  sha3_test_elapsed();

@@ -48,6 +48,7 @@ class WithVC707Tweaks extends Config (
   new WithFPGAFrequency(50) ++ // default 50MHz freq
   // harness binders
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+//  new WithVC707JTAGHarnessBinder ++
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
