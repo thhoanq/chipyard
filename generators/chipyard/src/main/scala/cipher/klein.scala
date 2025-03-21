@@ -22,9 +22,9 @@ case object KLEINKey extends Field[Option[KLEINParams]](None)
 
 
 class KLEINIO extends Bundle {
-	val iclk 		= Input(Clock())
-	val ireset 		= Input(Bool())
-	val ics 		= Input(Bool())
+	val iclk 		    = Input(Clock())
+	val ireset 		  = Input(Bool())
+	val ics 		    = Input(Bool())
 	val iwe         = Input(Bool())
   val iaddress    = Input(UInt(8.W))
   val iwrite_data = Input(UInt(32.W))
@@ -56,8 +56,12 @@ class klein extends BlackBox with HasBlackBoxResource {
 
 // DOC include start: KLEIN router
 class KLEINTL(params: KLEINParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
-  val device = new SimpleDevice("klein", Seq("customNoC,klein"))
-  val node = TLRegisterNode(Seq(AddressSet(params.address, 0xfff)), device, "reg/control", beatBytes=beatBytes)
+  val device = new SimpleDevice("klein", Seq("deslab,klein"))
+  val node = TLRegisterNode(
+    address = Seq(AddressSet(params.address, 0xff)),
+    device = device,
+    deviceKey =  "reg/control",
+    beatBytes=beatBytes)
 
   override lazy val module = new KLEINImpl
   class KLEINImpl extends Impl {
@@ -111,7 +115,6 @@ trait CanHavePeripheryKLEIN { this: BaseSubsystem =>
 
   private val pbus = locateTLBusWrapper(PBUS)
 
-  // Only build if we are using the TL (nonAXI4) version
   p(KLEINKey) match {
     case Some(params) => {
       val klein = {

@@ -127,7 +127,7 @@ class WithArty100TUART(uartMappings: Seq[(String, String, Int)]) extends Harness
 // Maps the UART device to PMOD JD pins 3/7
 class WithArty100TPMODUARTs extends WithArty100TUART(Seq(
   ("G2", "F3", 0),
-  ("D3", "H2", 1)
+//  ("D3", "H2", 1)
 ))
 
 class WithArty100TJTAG extends HarnessBinder({
