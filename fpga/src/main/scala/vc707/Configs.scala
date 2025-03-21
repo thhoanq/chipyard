@@ -41,48 +41,49 @@ class WithSystemModifications extends Config((site, here, up) => {
 class WithVC707Tweaks extends Config (
   // clocking
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
-  new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.config.WithUniformBusFrequencies(50.0) ++
+    new chipyard.clocking.WithPassthroughClockGenerator ++
+    new chipyard.config.WithUniformBusFrequencies(50.0) ++
 
-  new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
-  new WithFPGAFrequency(50) ++ // default 50MHz freq
-  // harness binders
-  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
-//  new WithVC707JTAGHarnessBinder ++
-  new WithVC707UARTHarnessBinder ++
-  new WithVC707SPISDCardHarnessBinder ++
-  new WithVC707DDRMemHarnessBinder ++
-  // other configuration
-  new WithDefaultPeripherals ++
-  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
-  new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-  new chipyard.config.WithNoDebug ++ // remove debug module
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
+    new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
+    new WithFPGAFrequency(50) ++ // default 50MHz freq
+    // harness binders
+    new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+    //  new WithVC707JTAGHarnessBinder ++
+    new WithVC707UARTHarnessBinder ++
+    new WithVC707SPISDCardHarnessBinder ++
+    new WithVC707DDRMemHarnessBinder ++
+    // other configuration
+    new chipyard.iobinders.WithGPIOPunchthrough ++    /** No tie-off GPIOs */
+    new WithDefaultPeripherals ++
+    new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
+    new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
+    new chipyard.config.WithNoDebug ++ // remove debug module
+    new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+    new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )
 
 class RocketVC707Config extends Config (
   new WithVC707Tweaks ++
-  new chipyard.RocketConfig
+    new chipyard.RocketConfig
 )
 
 class CustomVC707Config extends Config (
   new WithVC707Tweaks ++
-  new chipyard.QuadCoreRing
+    new chipyard.QuadCoreRing
 )
 
 class BoomVC707Config extends Config (
   new WithFPGAFrequency(50) ++
-  new WithVC707Tweaks ++
-  new chipyard.MegaBoomV3Config
+    new WithVC707Tweaks ++
+    new chipyard.MegaBoomV3Config
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config (
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++
-  new chipyard.config.WithMemoryBusFrequency(fMHz) ++
-  new chipyard.config.WithSystemBusFrequency(fMHz) ++
-  new chipyard.config.WithControlBusFrequency(fMHz) ++
-  new chipyard.config.WithFrontBusFrequency(fMHz)
+    new chipyard.config.WithMemoryBusFrequency(fMHz) ++
+    new chipyard.config.WithSystemBusFrequency(fMHz) ++
+    new chipyard.config.WithControlBusFrequency(fMHz) ++
+    new chipyard.config.WithFrontBusFrequency(fMHz)
 )
 
 class WithFPGAFreq25MHz extends WithFPGAFrequency(25)
