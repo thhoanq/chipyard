@@ -1,22 +1,27 @@
 package demoriscv.fpga.arty100t
 
-import chipyard._
-import chipyard.harness._
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.subsystem.SystemBusKey
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
-import org.chipsalliance.cde.config.Parameters
-import sifive.blocks.devices.uart._
-import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
-import sifive.fpgashells.shell._
+import freechips.rocketchip.prci._
+import freechips.rocketchip.subsystem.{SystemBusKey}
 
-class Arty100THarness(override implicit val p: Parameters) extends Arty100TCustomShell
-{
+import sifive.fpgashells.shell.xilinx._
+import sifive.fpgashells.shell._
+import sifive.fpgashells.clocks._
+import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
+
+import sifive.blocks.devices.uart._
+import sifive.blocks.devices.gpio.GPIOPortIO
+
+import chipyard._
+import chipyard.harness._
+
+class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
 
-  // ========= Clock =================
   val clockOverlay = dp(ClockInputOverlayKey).map(_.place(ClockInputDesignInput())).head
   val harnessSysPLL = dp(PLLFactoryKey)
   val harnessSysPLLNode = harnessSysPLL()
@@ -29,11 +34,6 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TCusto
 
   harnessSysPLLNode := clockOverlay.overlayOutput.node
 
-  // ========= UART =================
-  val io_uart_bb = BundleBridgeSource(() => new UARTPortIO(dp(PeripheryUARTKey).headOption.getOrElse(UARTParams(0))))
-  val uartOverlay = dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
-
-  // ========= DDR =================
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
@@ -42,33 +42,33 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TCusto
   val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
   ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
 
-  // ========= Status LED =================
-  val ledStatusOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
-  val status_leds = ledStatusOverlays.map(_.overlayOutput.led)
+  val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
+  val all_leds = ledOverlays.map(_.overlayOutput.led)
+  val status_leds = all_leds.take(3)
+  val other_leds = all_leds.drop(3)
 
-  // ========= JTAG =======================
-  val jtagOverlay = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
 
   override lazy val module = new HarnessLikeImpl
 
   class HarnessLikeImpl extends Impl with HasHarnessInstantiators {
+    all_leds.foreach(_ := DontCare)
     clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
 
-    val clk_tick = clockOverlay.overlayOutput.node.out.head._1.clock
+    val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock
 
     // Blink the status LEDs for sanity
-    withClockAndReset(clk_tick, dutClock.in.head._1.reset) {
-      val period = (BigInt(100) << 20) / 2
+    withClockAndReset(clk_100mhz, dutClock.in.head._1.reset) {
+      val period = (BigInt(100) << 20) / status_leds.size
       val counter = RegInit(0.U(log2Ceil(period).W))
-      val on = RegInit(0.U(1.W))
+      val on = RegInit(0.U(log2Ceil(status_leds.size).W))
+      status_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
       counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
       when (counter === 0.U) {
-        on := !on
+        on := Mux(on === (status_leds.size-1).U, 0.U, on + 1.U)
       }
-      status_leds(2) := on
     }
 
-    status_leds(0) := resetPin
+    other_leds(0) := resetPin
 
     harnessSysPLL.plls.foreach(_._1.getReset.get := pllReset)
 
@@ -77,12 +77,15 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TCusto
     def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
 
+    childClock := harnessBinderClock
+    childReset := harnessBinderReset
+
     ddrOverlay.mig.module.clock := harnessBinderClock
     ddrOverlay.mig.module.reset := harnessBinderReset
     ddrBlockDuringReset.module.clock := harnessBinderClock
     ddrBlockDuringReset.module.reset := harnessBinderReset.asBool || !ddrOverlay.mig.module.io.port.init_calib_complete
 
-    status_leds(1) := ddrOverlay.mig.module.io.port.init_calib_complete
+    other_leds(6) := ddrOverlay.mig.module.io.port.init_calib_complete
 
     instantiateChipTops()
   }
