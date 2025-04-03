@@ -127,7 +127,7 @@ class WithArty100TUART(uartMappings: Seq[(String, String, Int)]) extends Harness
 // Maps the UART device to PMOD JD pins 3/7
 class WithArty100TPMODUARTs extends WithArty100TUART(Seq(
   ("G2", "F3", 0),
-//  ("D3", "H2", 1)
+  ("D3", "H2", 1)
 ))
 
 class WithArty100TJTAG extends HarnessBinder({
@@ -154,21 +154,27 @@ class WithArty100TJTAG extends HarnessBinder({
 })
 
 // Map the GPIO to sw and led
-class WithArty100TGPIO extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: GPIOPinsPort, chipId: Int) => {
-    val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-    val harnessIO = IO(chiselTypeOf(port.io))
-    harnessIO.pins.zipWithIndex.foreach { case (pin, index) =>
-      harnessIO.suggestName(s"gpio_${index}")
-    }
-    harnessIO <> port.io
-
-    harnessIO.pins.foreach(_.i.po.foreach(_ := false.B))
-    val packagePinsWithPackageIOs = Seq(("H5", IOPin(harnessIO.pins.head.toBasePin().asInstanceOf[chisel3.experimental.Analog])))
-    packagePinsWithPackageIOs.foreach { case (pin, io) => {
-      ath.xdc.addPackagePin(io, pin)
-      ath.xdc.addIOStandard(io, "LVCMOS33")
-      ath.xdc.addIOB(io)
-    }}
-  }
-})
+//class WithArty100TGPIO extends HarnessBinder({
+//  case (th: HasHarnessInstantiators, port: GPIOPinsPort, chipId: Int) => {
+//    val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+//    val harnessIO = IO(chiselTypeOf(port.io)).suggestName("gpio")
+//    harnessIO <> port.io
+//
+//    harnessIO.pins.foreach(_.i.po.foreach(_ := false.B))
+//    val packagePinsWithPackageIOs = Seq(
+//      ("H5", harnessIO.pins(0)),
+//      ("J5", harnessIO.pins(1)),
+//      ("T9", harnessIO.pins(2)),
+//      ("T10", harnessIO.pins(3)),
+//      ("A8", harnessIO.pins(4)),
+//      ("C11", harnessIO.pins(5)),
+//      ("C10", harnessIO.pins(6)),
+//      ("A10", harnessIO.pins(7)),
+//    )
+//    packagePinsWithPackageIOs.foreach { case (pin, io) => {
+//      ath.xdc.addPackagePin(io, pin)
+//      ath.xdc.addIOStandard(io, "LVCMOS33")
+//      ath.xdc.addIOB(io)
+//    }}
+//  }
+//})

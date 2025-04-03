@@ -3,21 +3,19 @@ package chipyard.fpga.arty100t
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.diplomacy._
-import org.chipsalliance.cde.config.{Parameters}
+import org.chipsalliance.cde.config.Parameters
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.prci._
-import freechips.rocketchip.subsystem.{SystemBusKey}
-
+import freechips.rocketchip.subsystem.SystemBusKey
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
 import sifive.fpgashells.clocks._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
-
 import sifive.blocks.devices.uart._
-import sifive.blocks.devices.gpio.GPIOPortIO
-
+import sifive.blocks.devices.gpio.{GPIOPortIO, PeripheryGPIOKey}
 import chipyard._
 import chipyard.harness._
+import com.github.nscala_time.time.Imports
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
@@ -42,33 +40,60 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
   ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
 
+//  val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
+//  val all_leds = ledOverlays.map(_.overlayOutput.led)
+//  val status_leds = all_leds.take(3)
+//  val other_leds = all_leds.drop(3)
+
+  // test leds: Start
   val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
   val all_leds = ledOverlays.map(_.overlayOutput.led)
-  val status_leds = all_leds.take(3)
-  val other_leds = all_leds.drop(3)
+  val gleds = all_leds.takeRight(4) // Take four green leds
 
+  val swOverlays = dp(SwitchOverlayKey).map(_.place(SwitchDesignInput()))
+  val sws = swOverlays.map(_.overlayOutput.sw)
+  // End
 
   override lazy val module = new HarnessLikeImpl
 
   class HarnessLikeImpl extends Impl with HasHarnessInstantiators {
     all_leds.foreach(_ := DontCare)
+
     clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
 
     val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock
 
-    // Blink the status LEDs for sanity
+    // test led: Start
     withClockAndReset(clk_100mhz, dutClock.in.head._1.reset) {
-      val period = (BigInt(100) << 20) / status_leds.size
-      val counter = RegInit(0.U(log2Ceil(period).W))
-      val on = RegInit(0.U(log2Ceil(status_leds.size).W))
-      status_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
-      counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
-      when (counter === 0.U) {
-        on := Mux(on === (status_leds.size-1).U, 0.U, on + 1.U)
-      }
-    }
+//      val period = (BigInt(100) << 20) / gleds.size
+//      val counter = RegInit(0.U(log2Ceil(period).W))
+//      val on = RegInit(0.U(log2Ceil(gleds.size).W))
+//      gleds.zipWithIndex.map { case (o,s) => o := on === s.U }
+//      counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
+//      when (counter === 0.U) {
+//        on := Mux(on === (gleds.size-1).U, 0.U, on + 1.U)
+//      }
 
-    other_leds(0) := resetPin
+//      val on = RegInit(0.U)
+//      gleds.zip(sws).foreach { case (led, sw) =>
+//        led := sw
+//      }
+    }
+    // End
+
+    // Blink the status LEDs for sanity
+//    withClockAndReset(clk_100mhz, dutClock.in.head._1.reset) {
+//      val period = (BigInt(100) << 20) / status_leds.size
+//      val counter = RegInit(0.U(log2Ceil(period).W))
+//      val on = RegInit(0.U(log2Ceil(status_leds.size).W))
+//      status_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
+//      counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
+//      when (counter === 0.U) {
+//        on := Mux(on === (status_leds.size-1).U, 0.U, on + 1.U)
+//      }
+//    }
+
+//    other_leds(0) := resetPin
 
     harnessSysPLL.plls.foreach(_._1.getReset.get := pllReset)
 
@@ -85,7 +110,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     ddrBlockDuringReset.module.clock := harnessBinderClock
     ddrBlockDuringReset.module.reset := harnessBinderReset.asBool || !ddrOverlay.mig.module.io.port.init_calib_complete
 
-    other_leds(6) := ddrOverlay.mig.module.io.port.init_calib_complete
+//    other_leds(6) := ddrOverlay.mig.module.io.port.init_calib_complete
 
     instantiateChipTops()
   }
