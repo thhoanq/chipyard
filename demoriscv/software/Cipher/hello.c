@@ -4,16 +4,8 @@
 #include "include/platform.h"
 #include "kprintf.h"
 
-//#include "accel_klein.h"
-//#include "accel_chacha.h"
-//#include "accel_blake2s.h"
-//#include "accel_present.h"
-//#include "accel_dmpresent.h"
-//#include "accel_prince.h"
-//#include "accel_sha3.h"
-//#include "accel_aes.h"
-
-//#include "mytimer.h"
+#include "cipher/accel_chacha.h"
+#include "cipher/accel_blake2s.h"
 
 #define REG32(p, i)	((p)[(i) >> 2])
 
@@ -48,14 +40,14 @@ int main(int argc, char **arv) {
 //  klein_test();
 
   // chacha core test
-//  chacha_soft_reset();
-//  chacha_test_cases();
+  chacha_soft_reset();
+  chacha_test_cases();
 
   // blake2s core test
-//  blake2s_clear_block();
-//  blake2s_test_empty_message();
-//  blake2s_clear_block();
-//  blake2s_test_RFC_7693();
+  blake2s_clear_block();
+  blake2s_test_empty_message();
+  blake2s_clear_block();
+  blake2s_test_RFC_7693();
 
   // present core test
 //  present_test_cases();
