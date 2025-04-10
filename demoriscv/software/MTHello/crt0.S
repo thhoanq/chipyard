@@ -15,25 +15,23 @@ _prog_start:
     beqz    s0, _setup
     li      t0, 0x8
     csrw    mie, t0
-    wfi
+    wfi                             // sleep if is not hart 0
     j       _entry
-_setup:
+_setup:                             // hart 0 setup only
     li      t0, 1
     li      t1, (UART_CTRL_ADDR + UART_REG_TXCTRL)
     sw      t0, 0(t1)
 _entry:
-    csrw    mie, zero
-    csrr    a0, mhartid
-    addi    a1, a0, 1
+    csrw    mie, zero               // ensure no new interrupt wile harts set up their stacks and move to main()
+    csrr    a0, mhartid             // a0 is the first function argument of main()
+    addi    a1, a0, 1               // sp = SCRATCH_TOP - (hartid+1)*STACK_SIZE + (STACK_SIZE-16)
     slli    a1, a1, STACK_SHIFT
     li      t0, SCRATCH_TOP
     sub     sp, t0, a1
-    addi    sp, sp, STACK_SIZE-16
+    addi    sp, sp, STACK_SIZE-16   // 16-byte alignment gap
     call    main
 _loopback:
     li      t0, 0x8
     csrw    mie, t0
-    wfi
+    wfi                             // all harts sleep when main() finish
     j       _loopback
-
-    .size _prog_start, . - _prog_start

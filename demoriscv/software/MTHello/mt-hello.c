@@ -15,30 +15,27 @@ void delay() {
 }
 
 int main(int hartid, char **arv) {
-  REG32(uart, UART_REG_TXCTRL) = UART_TXEN; // Already in bootROM
 
-  uint32_t core_id = read_csr(mhartid);
-
-  if(core_id == 0) {
-    kprintf("Hello from core %c\r\n", core_id + 48);
+  if(hartid == 0) {
+    kprintf("Hello from core %c\r\n", hartid + 48);
     delay();
     REG32(msip, CLINT_MSIP0) = CLINT_MSIPCLR;
     REG32(msip, CLINT_MSIP1) = CLINT_MSIPEN;
   }
-  if(core_id == 1) {
-    kprintf("Hello from core %c\r\n", core_id + 48);
+  if(hartid == 1) {
+    kprintf("Hello from core %c\r\n", hartid + 48);
     delay();
     REG32(msip, CLINT_MSIP1) = CLINT_MSIPCLR;
     REG32(msip, CLINT_MSIP2) = CLINT_MSIPEN;
   }
-  if(core_id == 2) {
-    kprintf("Hello from core %c\r\n", core_id + 48);
+  if(hartid == 2) {
+    kprintf("Hello from core %c\r\n", hartid + 48);
     delay();
     REG32(msip, CLINT_MSIP2) = CLINT_MSIPCLR;
     REG32(msip, CLINT_MSIP3) = CLINT_MSIPEN;
   }
-  if(core_id == 3) {
-    kprintf("Hello from core %c\r\n", core_id + 48);
+  if(hartid == 3) {
+    kprintf("Hello from core %c\r\n", hartid + 48);
     delay();
     REG32(msip, CLINT_MSIP3) = CLINT_MSIPCLR;
     REG32(msip, CLINT_MSIP0) = CLINT_MSIPEN;
