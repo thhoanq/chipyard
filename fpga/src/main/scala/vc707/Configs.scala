@@ -1,38 +1,59 @@
 package chipyard.fpga.vc707
 
 import sys.process._
-
-import org.chipsalliance.cde.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
+import org.chipsalliance.cde.config.{Config, Field, Parameters}
+import freechips.rocketchip.subsystem.{ControlBusKey, ExtMem, PeripheryBusKey, SystemBusKey}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
-import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
-import freechips.rocketchip.diplomacy.{RegionType, AddressSet}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, DevNullParams}
+import freechips.rocketchip.diplomacy.{AddressSet, RegionType}
 import freechips.rocketchip.resources.{DTSModel, DTSTimebase}
-
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
-
-import sifive.fpgashells.shell.{DesignKey}
-import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize}
-
-import testchipip.serdes.{SerialTLKey}
-
+import sifive.fpgashells.shell.DesignKey
+import sifive.fpgashells.shell.xilinx.VC7074GDDRSize
+import testchipip.serdes.SerialTLKey
 import chipyard.{BuildSystem, ExtTLMem}
 import chipyard.harness._
+import sifive.blocks.devices.gpio.{GPIOParams, PeripheryGPIOKey}
+import sifive.blocks.devices.i2c.{I2CParams, PeripheryI2CKey}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
   case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
 })
 
+class WithCustomPeripherals extends Config((site, here, up) => {
+  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)), UARTParams(address = BigInt(0x64003000L)))
+  case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)), SPIParams(rAddress = BigInt(0x64004000L)))
+  case PeripheryGPIOKey => List(GPIOParams(address = BigInt(0x64002000L), width = 8))
+  case PeripheryI2CKey => List(I2CParams(address = BigInt(0x64005000L)))
+})
+
+//class WithSystemModifications extends Config((site, here, up) => {
+//  case DTSTimebase => BigInt{(1e6).toLong}
+//  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
+//    // invoke makefile for sdboot
+//    val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
+//    val make = s"make -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
+//    require (make.! == 0, "Failed to build bootrom")
+//    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin")
+//  }
+//  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
+//  case SerialTLKey => Nil // remove serialized tl port
+//})
+
 class WithSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt{(1e6).toLong}
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
+    // clean
+    val clean = s"make -C fpga/src/main/resources/bootROM/MTBoot clean"
+    require (clean.! == 0, "Failed to clean")
+    // build the BootROM
+    val make = s"make -C fpga/src/main/resources/bootROM/MTBoot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
-    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin")
+    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/bootROM/MTBoot/build/sdboot.bin")
   }
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
   case SerialTLKey => Nil // remove serialized tl port
@@ -53,6 +74,8 @@ class WithVC707Tweaks extends Config (
     new WithVC707SPISDCardHarnessBinder ++
     new WithVC707DDRMemHarnessBinder ++
     // other configuration
+    new chipyard.config.WithBroadcastManager ++
+    new chipyard.harness.WithI2CTiedOff ++
     new chipyard.iobinders.WithGPIOPunchthrough ++    /** No tie-off GPIOs */
     new WithDefaultPeripherals ++
     new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
@@ -69,7 +92,31 @@ class RocketVC707Config extends Config (
 
 class CustomVC707Config extends Config (
   new WithVC707Tweaks ++
-    new chipyard.QuadCoreRing
+  new chipyard.QuadCoreRing
+)
+
+class TestVC707Config extends Config (
+  new WithVC707Tweaks ++
+  new chipyard.GCDTLBlackBoxRocketConfig
+)
+
+class InternshipConfig extends Config (
+  new WithVC707Tweaks ++
+  new chipyard.cipher.WithMyTimer(address = 0x00007000) ++
+  new chipyard.cipher.WithKLEIN(address = 0x00006000) ++
+  new chipyard.config.WithBroadcastManager ++
+  new testchipip.soc.WithNoScratchpads ++
+  new freechips.rocketchip.rocket.WithNSmallCores(1) ++
+  new chipyard.config.AbstractConfig
+)
+
+class QuadCoreVC707Config extends Config (
+  new WithVC707Tweaks ++
+  new testchipip.soc.WithNoScratchpads ++
+  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = false) ++
+  new freechips.rocketchip.rocket.WithNCustomCores(2, withFPU = true, lengthFPU = 32) ++
+  new freechips.rocketchip.rocket.WithNCustomCores(1, withFPU = true, lengthFPU = 64) ++
+  new chipyard.config.AbstractConfig
 )
 
 class BoomVC707Config extends Config (

@@ -3,8 +3,8 @@
 
 #include "mmio.h"
 
-#define MyTimer_control       0x6500     // Bit high to low: reset-we-cs
-#define MyTimer_count         0x6504
+#define MyTimer_control       0x6800     // Bit high to low: reset-we-cs
+#define MyTimer_count         0x6804
 
 // MSB to LSB => {reset, clear, pause, start)
 

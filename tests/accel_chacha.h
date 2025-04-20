@@ -4,10 +4,10 @@
 #include "mmio.h"
 
 
-#define CHACHA_control  0x6100     // Bit high to low: reset-we-cs
-#define CHACHA_addr     0x6104
-#define CHACHA_write    0x6108
-#define CHACHA_read     0x610C
+#define CHACHA_control  0x10007000     // Bit high to low: reset-we-cs
+#define CHACHA_addr     0x10007004
+#define CHACHA_write    0x10007008
+#define CHACHA_read     0x1000700C
 
 #define CTRL_CHACHA_IDLE    0x00
 #define CTRL_CHACHA_RESET   0x04
@@ -204,10 +204,10 @@ static void chacha_test_cases() {
   printf("# ChaCha - 20 rounds, 256-bit key, next block ================================\n");
 	printf("Expected result: 9f07e7be5551387a98ba977c732d080dcb0f29a048e3656912c6533e32ee7aed29b721769ce64e43d57133b074d839d531ed1f28510afb45ace10a1f4b794d6f");
 	printf("\n");
-	printf("Result dump:     9f07e7be5551387a98ba977c732d080dcb0f29a048e3656912c6533e32ee7aed29b721769ce64e43d57133b074d839d531ed1f28510afb45ace10a1f4b794d6f");
-//	printf("Result dump:     ");
-//	for(int i = 0; i < 16; i++)
-//	    printf("%08x", chacha_dump[i]);
+//	printf("Result dump:     9f07e7be5551387a98ba977c732d080dcb0f29a048e3656912c6533e32ee7aed29b721769ce64e43d57133b074d839d531ed1f28510afb45ace10a1f4b794d6f");
+	printf("Result dump:     ");
+	for(int i = 0; i < 16; i++)
+	    printf("%08x", chacha_dump[i]);
 
   printf("\n\n");
 

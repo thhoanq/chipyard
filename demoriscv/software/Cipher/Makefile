@@ -19,64 +19,37 @@ LFLAGS=-static -nostdlib -L $(ROOT_DIR)/linker -T hello.elf.lds
 PBUS_CLK ?= 1000000
 
 #################################
-# Build both hello and mt-hello by default
+# Build cipher by default
 #################################
 .PHONY: default
-default: hello.bin hello.dump mt-hello.bin mt-hello.dump
+default: cipher.bin cipher.dump
 
 #################################
-# HELLO build rules
+# CIPHER build rules
 #################################
-HELLO_ELF 	:= $(BUILD_DIR)/hello.elf
-HELLO_BIN 	:= $(BUILD_DIR)/hello.bin
-HELLO_DUMP 	:= $(BUILD_DIR)/hello.dump
+CIPHER_ELF  := $(BUILD_DIR)/cipher.elf
+CIPHER_BIN  := $(BUILD_DIR)/cipher.bin
+CIPHER_DUMP := $(BUILD_DIR)/cipher.dump
 
-$(HELLO_ELF): hello.c kprintf.c
+$(CIPHER_ELF): cipher.c kprintf.c
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ crt0.S hello.c kprintf.c
+	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ crt0.S cipher.c kprintf.c
 
-.PHONY: hello.elf
-hello.elf: $(HELLO_ELF)
+.PHONY: cipher.elf
+cipher.elf: $(CIPHER_ELF)
 
-$(HELLO_BIN): $(HELLO_ELF)
-	mkdir -p $(BUILD_DIR)
-	$(OBJCOPY) -O binary $< $@
-
-.PHONY: hello.bin
-hello.bin: $(HELLO_BIN)
-
-$(HELLO_DUMP): $(HELLO_ELF)
-	$(OBJDUMP) -D -S $< > $@
-
-.PHONY: hello.dump
-hello.dump: $(HELLO_DUMP)
-
-#################################
-# MT-HELLO build rules
-#################################
-MT_HELLO_ELF  := $(BUILD_DIR)/mt-hello.elf
-MT_HELLO_BIN  := $(BUILD_DIR)/mt-hello.bin
-MT_HELLO_DUMP := $(BUILD_DIR)/mt-hello.dump
-
-$(MT_HELLO_ELF): mt-hello.c kprintf.c
-	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ crt0.S mt-hello.c kprintf.c
-
-.PHONY: mt-hello.elf
-mt-hello.elf: $(MT_HELLO_ELF)
-
-$(MT_HELLO_BIN): $(MT_HELLO_ELF)
+$(CIPHER_BIN): $(CIPHER_ELF)
 	mkdir -p $(BUILD_DIR)
 	$(OBJCOPY) -O binary $< $@
 
-.PHONY: mt-hello.bin
-mt-hello.bin: $(MT_HELLO_BIN)
+.PHONY: cipher.bin
+cipher.bin: $(CIPHER_BIN)
 
-$(MT_HELLO_DUMP): $(MT_HELLO_ELF)
+$(CIPHER_DUMP): $(CIPHER_ELF)
 	$(OBJDUMP) -D -S $< > $@
 
-.PHONY: mt-hello.dump
-mt-hello.dump: $(MT_HELLO_DUMP)
+.PHONY: cipher.dump
+cipher.dump: $(CIPHER_DUMP)
 
 #################################
 # CLEAN

@@ -54,7 +54,7 @@ class present_wrapper extends BlackBox with HasBlackBoxResource {
 class PresentTL(params: PresentParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
   val device = new SimpleDevice("present", Seq("deslab,present"))
   val node = TLRegisterNode(
-    address = Seq(AddressSet(params.address, 0xff)),
+    address = Seq(AddressSet(params.address, 0xfff)),
     device = device,
     deviceKey = "reg/control",
     beatBytes = beatBytes)
