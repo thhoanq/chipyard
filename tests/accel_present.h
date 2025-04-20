@@ -3,10 +3,10 @@
 
 #include "mmio.h"
 
-#define PRESENT_control  0x6200     // Bit high to low: reset-we-cs
-#define PRESENT_addr     0x6204
-#define PRESENT_write    0x6208
-#define PRESENT_read     0x620C
+#define PRESENT_control  0x10008000     // Bit high to low: reset-we-cs
+#define PRESENT_addr     0x10008004
+#define PRESENT_write    0x10008008
+#define PRESENT_read     0x1000800C
 
 #define CTRL_PRESENT_IDLE    0x00
 #define CTRL_PRESENT_RESET   0x04

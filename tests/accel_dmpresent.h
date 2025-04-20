@@ -3,10 +3,10 @@
 
 #include "mmio.h"
 
-#define DMPRESENT_control  0x6300     // Bit high to low: reset-we-cs
-#define DMPRESENT_addr     0x6304
-#define DMPRESENT_write    0x6308
-#define DMPRESENT_read     0x630C
+#define DMPRESENT_control  0x10009000     // Bit high to low: reset-we-cs
+#define DMPRESENT_addr     0x10009004
+#define DMPRESENT_write    0x10009008
+#define DMPRESENT_read     0x1000900C
 
 #define CTRL_DMPRESENT_IDLE     0x00
 #define CTRL_DMPRESENT_RESET    0x04

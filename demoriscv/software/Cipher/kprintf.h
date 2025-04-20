@@ -2,7 +2,7 @@
 #ifndef _SDBOOT_KPRINTF_H
 #define _SDBOOT_KPRINTF_H
 
-#include "include/platform.h"
+#include "platform.h"
 #include <stdint.h>
 
 #define REG32(p, i)	((p)[(i) >> 2])

@@ -3,10 +3,10 @@
 
 #include "klein64.h"
 
-#define KLEIN_TRIGGER   0x00006000
-#define KLEIN_DATA_A    0x00006004
-#define KLEIN_DATA_B    0x00006008
-#define KLEIN_DATA_C    0x0000600C
+#define KLEIN_TRIGGER   0x10006000
+#define KLEIN_DATA_A    0x10006004
+#define KLEIN_DATA_B    0x10006008
+#define KLEIN_DATA_C    0x1000600C
 
 #define KLEIN_ADDR_CTRL     0x00
 #define KLEIN_ADDR_CONF     0x01

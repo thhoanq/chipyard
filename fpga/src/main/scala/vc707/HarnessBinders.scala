@@ -15,14 +15,24 @@ import sifive.fpgashells.shell.ShellJTAGIO
 /*** UART ***/
 class WithVC707UARTHarnessBinder extends HarnessBinder({
   case (th: VC707FPGATestHarnessImp, port: UARTPort, chipId: Int) => {
-    th.vc707Outer.io_uart_bb.bundle <> port.io
+    if(port.uartNo == 0) {
+      th.vc707Outer.io_uart_bb.bundle <> port.io
+    }
+    else {
+      port.io <> DontCare
+    }
   }
 })
 
 /*** SPI ***/
 class WithVC707SPISDCardHarnessBinder extends HarnessBinder({
   case (th: VC707FPGATestHarnessImp, port: SPIPort, chipId: Int) => {
-    th.vc707Outer.io_spi_bb.bundle <> port.io
+    if(port.io.toNamed.name == "spi_0") {
+      th.vc707Outer.io_spi_bb.bundle <> port.io
+    }
+    else {
+      port.io <> DontCare
+    }
   }
 })
 

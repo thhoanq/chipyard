@@ -44,7 +44,7 @@ class mytimer extends BlackBox with HasBlackBoxResource {
 class MyTimerTL(params: MyTimerParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
   val device = new SimpleDevice("mytimer", Seq("deslab,mytimer"))
   val node = TLRegisterNode(
-    address = Seq(AddressSet(params.address, 0xff)),
+    address = Seq(AddressSet(params.address, 0xfff)),
     device = device,
     deviceKey = "reg/control",
     beatBytes = beatBytes)

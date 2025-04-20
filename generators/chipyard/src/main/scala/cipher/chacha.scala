@@ -49,7 +49,7 @@ class chacha extends BlackBox with HasBlackBoxResource {
 class ChaChaTL(params: ChaChaParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
   val device = new SimpleDevice("chacha", Seq("deslab,chacha"))
   val node = TLRegisterNode(
-    address = Seq(AddressSet(params.address, 0xff)),
+    address = Seq(AddressSet(params.address, 0xfff)),
     device = device,
     deviceKey = "reg/control",
     beatBytes = beatBytes)

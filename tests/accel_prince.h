@@ -3,10 +3,10 @@
 
 #include "mmio.h"
 
-#define PRINCE_control  0x6000     // Bit high to low: reset-we-cs
-#define PRINCE_addr     0x6004
-#define PRINCE_write    0x6008
-#define PRINCE_read     0x600C
+#define PRINCE_control  0x1000B000     // Bit high to low: reset-we-cs
+#define PRINCE_addr     0x1000B004
+#define PRINCE_write    0x1000B008
+#define PRINCE_read     0x1000B00C
 
 #define CTRL_PRINCE_IDLE    0x00
 #define CTRL_PRINCE_RESET   0x04

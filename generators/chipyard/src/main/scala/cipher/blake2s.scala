@@ -55,7 +55,7 @@ class blake2s extends BlackBox with HasBlackBoxResource {
 class BLAKE2STL(params: BLAKE2SParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
   val device = new SimpleDevice("blake2s", Seq("deslab,blake2s"))
   val node = TLRegisterNode(
-    address = Seq(AddressSet(params.address, 0xff)),
+    address = Seq(AddressSet(params.address, 0xfff)),
     device = device,
     deviceKey =  "reg/control",
     beatBytes = beatBytes)

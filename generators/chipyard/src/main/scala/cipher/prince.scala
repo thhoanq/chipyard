@@ -48,7 +48,7 @@ class prince extends BlackBox with HasBlackBoxResource {
 class PrinceTL(params: PrinceParams, beatBytes: Int)(implicit p: Parameters) extends ClockSinkDomain(ClockSinkParameters())(p) {
   val device = new SimpleDevice("prince", Seq("deslab,prince"))
   val node = TLRegisterNode(
-    address = Seq(AddressSet(params.address, 0xff)),
+    address = Seq(AddressSet(params.address, 0xfff)),
     device = device,
     deviceKey = "reg/control",
     beatBytes = beatBytes)
