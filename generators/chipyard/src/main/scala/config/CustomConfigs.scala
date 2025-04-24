@@ -25,15 +25,15 @@ class PeripheralConfig(gpio: Int = 8) extends Config(
 // DOC include start: GCDTLBlackBoxRocketConfig
 class GCDTLBlackBoxRocketConfig extends Config(
   new chipyard.cipher.WithMyTimer(address = 0x1000E000) ++
-    new chipyard.cipher.WithAES(address = 0x1000D000) ++
-    new chipyard.cipher.WithSHA3(address = 0x1000C000) ++
-    new chipyard.cipher.WithPrince(address = 0x1000B000) ++
-    new chipyard.cipher.WithBLAKE2S(address = 0x1000A000) ++
-    new chipyard.cipher.WithDMPresent(address = 0x10009000) ++
-    new chipyard.cipher.WithPresent(address = 0x10008000) ++
-    new chipyard.cipher.WithChaCha(address = 0x10007000) ++
-    new chipyard.cipher.WithKLEIN(address = 0x10006000) ++
-
+//    new chipyard.cipher.WithAES(address = 0x1000D000) ++
+//    new chipyard.cipher.WithSHA3(address = 0x1000C000) ++
+//    new chipyard.cipher.WithPrince(address = 0x1000B000) ++
+//    new chipyard.cipher.WithBLAKE2S(address = 0x1000A000) ++
+//    new chipyard.cipher.WithDMPresent(address = 0x10009000) ++
+//    new chipyard.cipher.WithPresent(address = 0x10008000) ++
+//    new chipyard.cipher.WithChaCha(address = 0x10007000) ++
+//    new chipyard.cipher.WithKLEIN(address = 0x10006000) ++
+    new chipyard.cipher.WithASCON(address = 0x10006000) ++
     new freechips.rocketchip.subsystem.WithoutTLMonitors ++
     new freechips.rocketchip.rocket.WithNHugeCores(1) ++
     new chipyard.config.AbstractConfig)

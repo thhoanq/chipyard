@@ -14,7 +14,7 @@ sim_name := none
 #########################################################################################
 # include shared variables
 #########################################################################################
-SUB_PROJECT ?= arty100t_tinyRocket
+SUB_PROJECT ?= vc707
 
 #########################################################################################
 # My configuration
@@ -30,10 +30,25 @@ ifeq ($(SUB_PROJECT), arty100t_tinyRocket)
 	TB					?= none #unused
 	TOP					?= ChipTop
 	BOARD				?= arty_a7_100
-	FPGA_BOARD			?= xilinx
+	FPGA_BRAND			?= xilinx
 endif
 
+ifeq ($(SUB_PROJECT), vc707)
+	SBT_PROJECT			?= demoriscv
+	MODEL				?= VC707Harness
+	VLOG_MODEL			?= VC707Harness
+	MODEL_PACKAGE		?= demoriscv.fpga.vc707
+	CONFIG				?= QuadCoreVC707Config
+	CONFIG_PACKAGE		?= demoriscv.fpga.vc707
+	GENERATOR_PACKAGE	?= chipyard
+	TB					?= none #unused
+	TOP					?= ChipTop
+	BOARD				?= vc707
+	FPGA_BRAND			?= xilinx
+endif
 ################### End my configurations #################################################
+
+export USE_CHISEL6=1
 
 include $(base_dir)/variables.mk
 
@@ -77,7 +92,7 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
+	$(base_dir)/generators/rocket-chip-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules
