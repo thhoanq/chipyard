@@ -4,16 +4,17 @@
 
 ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR := $(ROOT_DIR)build
+SRCDIR = $(ROOT_DIR)src
 
 CC=$(RISCV)/bin/riscv64-unknown-elf-gcc
 OBJCOPY=$(RISCV)/bin/riscv64-unknown-elf-objcopy
 OBJDUMP=$(RISCV)/bin/riscv64-unknown-elf-objdump
 
-CFLAGS=-march=rv64gc -mcmodel=medany -O0 -std=gnu11 -Wall -nostartfiles
-CFLAGS+= -fno-common -g -DENTROPY=0 -mabi=lp64d -DNONSMP_HART=0
-CFLAGS+= -I $(ROOT_DIR)/include -I.
+CFLAGS := -march=rv64gc -mabi=lp64d -O0 -std=gnu11 -Wall -fno-common -g
+CFLAGS += -mcmodel=medany -I$(ROOT_DIR)/include -I.c
 
-LFLAGS=-static -nostdlib -L $(ROOT_DIR)/linker -T hello.elf.lds
+# Using linker and startup file in libgloss
+SPECS_FLAGS := --specs=htif_nano.specs
 
 # Clock option passed in
 PBUS_CLK ?= 1000000
@@ -33,7 +34,7 @@ CIPHER_DUMP := $(BUILD_DIR)/cipher.dump
 
 $(CIPHER_ELF): cipher.c kprintf.c
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ crt0.S cipher.c kprintf.c
+	$(CC) $(CFLAGS) $(SPECS_FLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ cipher.c kprintf.c
 
 .PHONY: cipher.elf
 cipher.elf: $(CIPHER_ELF)

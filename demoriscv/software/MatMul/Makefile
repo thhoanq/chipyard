@@ -4,27 +4,26 @@
 
 ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR := $(ROOT_DIR)build
+SRCDIR = $(ROOT_DIR)src
 
-CC=$(RISCV)/bin/riscv64-unknown-elf-gcc
-OBJCOPY=$(RISCV)/bin/riscv64-unknown-elf-objcopy
-OBJDUMP=$(RISCV)/bin/riscv64-unknown-elf-objdump
+CC := $(RISCV)/bin/riscv64-unknown-elf-gcc
+OBJCOPY := $(RISCV)/bin/riscv64-unknown-elf-objcopy
+OBJDUMP := $(RISCV)/bin/riscv64-unknown-elf-objdump
 
-CFLAGS=-march=rv64gc -mcmodel=medany -O0 -std=gnu11 -Wall -nostartfiles
-CFLAGS+= -fno-common -g -DENTROPY=0 -mabi=lp64d -DNONSMP_HART=0
-CFLAGS+= -I $(ROOT_DIR)/include -I.
+CFLAGS := -march=rv64gc -mabi=lp64d -O0 -std=gnu11 -Wall -fno-common -g
+CFLAGS += -mcmodel=medany -I$(ROOT_DIR)/include -I.c
 
-LFLAGS=-static -nostdlib -L $(ROOT_DIR)/linker -T matmul.elf.lds
+# Using linker and startup file in libgloss
+SPECS_FLAGS := --specs=htif_nano.specs
 
 # Clock option passed in
 PBUS_CLK ?= 1000000
-
 
 #################################
 # Build matmul by default
 #################################
 .PHONY: default
 default: matmul.bin matmul.dump
-
 
 #################################
 # MATMUL build rules
@@ -33,9 +32,12 @@ MATMUL_ELF  := $(BUILD_DIR)/matmul.elf
 MATMUL_BIN  := $(BUILD_DIR)/matmul.bin
 MATMUL_DUMP := $(BUILD_DIR)/matmul.dump
 
-$(MATMUL_ELF): matmul.c kprintf.c
+# Source file
+CSOURCES = $(wildcard $(SRCDIR)/*.c)
+
+$(MATMUL_ELF): $(CSOURCES)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ crt0.S matmul.c kprintf.c thread.S
+	$(CC) $(CFLAGS) $(SPECS_FLAGS) -DTL_CLK="$(PBUS_CLK)UL" -o $@ $^
 
 .PHONY: matmul.elf
 matmul.elf: $(MATMUL_ELF)
@@ -52,7 +54,6 @@ $(MATMUL_DUMP): $(MATMUL_ELF)
 
 .PHONY: matmul.dump
 matmul.dump: $(MATMUL_DUMP)
-
 
 #################################
 # CLEAN

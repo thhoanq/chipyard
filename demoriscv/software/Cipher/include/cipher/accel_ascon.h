@@ -1,5 +1,4 @@
-#include "mmio.h"
-#include "kprintf.h"
+
 
 #define ASCON_TRIGGER		0x10006000
 #define ASCON_DATA_A		0x10006004 // data_in

@@ -3,7 +3,7 @@
 #include <smp.h>
 #include "common.h"
 
-    .equ  SCRATCH_PAGE_SIZE,  0x2000  // 8kB
+    .equ  SCRATCH_PAGE_SIZE,  0xffff000
     .equ  STACK_SIZE,         0x800   // 2kB each hart
     .equ  STACK_SHIFT,        11
     .equ  SCRATCH_TOP,        (PAYLOAD_DEST + SCRATCH_PAGE_SIZE)

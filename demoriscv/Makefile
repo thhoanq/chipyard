@@ -19,12 +19,12 @@ SUB_PROJECT ?= vc707
 #########################################################################################
 # My configuration
 #########################################################################################
-ifeq ($(SUB_PROJECT), arty100t_tinyRocket)
+ifeq ($(SUB_PROJECT), arty100t)
 	SBT_PROJECT			?= demoriscv
 	MODEL				?= Arty100THarness
 	VLOG_MODEL			?= Arty100THarness
 	MODEL_PACKAGE		?= demoriscv.fpga.arty100t
-	CONFIG				?= TinyRocketArty100TConfig
+	CONFIG				?= MTArty100TConfig
 	CONFIG_PACKAGE		?= demoriscv.fpga.arty100t
 	GENERATOR_PACKAGE	?= chipyard
 	TB					?= none #unused

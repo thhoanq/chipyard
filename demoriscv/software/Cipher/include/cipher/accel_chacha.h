@@ -1,9 +1,9 @@
 #include "mmio.h"
 
-#define CHACHA_control  0x10006000     // Bit high to low: reset-we-cs
-#define CHACHA_addr     0x10006004
-#define CHACHA_write    0x10006008
-#define CHACHA_read     0x1000600C
+#define CHACHA_control  0x10007000     // Bit high to low: reset-we-cs
+#define CHACHA_addr     0x10007004
+#define CHACHA_write    0x10007008
+#define CHACHA_read     0x1000700C
 
 #define CTRL_CHACHA_IDLE    0x00
 #define CTRL_CHACHA_RESET   0x04
@@ -200,10 +200,10 @@ static void chacha_test_cases() {
   kprintf("# ChaCha - 20 rounds, 256-bit key, next block ================================\r\n");
 	kprintf("Expected result: 9f07e7be5551387a98ba977c732d080dcb0f29a048e3656912c6533e32ee7aed29b721769ce64e43d57133b074d839d531ed1f28510afb45ace10a1f4b794d6f");
 	kprintf("\r\n");
-	kprintf("Result dump:     9f07e7be5551387a98ba977c732d080dcb0f29a048e3656912c6533e32ee7aed29b721769ce64e43d57133b074d839d531ed1f28510afb45ace10a1f4b794d6f");
-//	kprintf("Result dump:     ");
-//	for(int i = 0; i < 16; i++)
-//	    kprintf("%x", chacha_dump[i]);
+//	kprintf("Result dump:     9f07e7be5551387a98ba977c732d080dcb0f29a048e3656912c6533e32ee7aed29b721769ce64e43d57133b074d839d531ed1f28510afb45ace10a1f4b794d6f");
+	kprintf("Result dump:     ");
+	for(int i = 0; i < 16; i++)
+	    kprintf("%x", chacha_dump[i]);
 
   kprintf("\r\n\r\n");
 

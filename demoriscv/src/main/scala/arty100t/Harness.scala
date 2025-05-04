@@ -14,79 +14,84 @@ import sifive.fpgashells.clocks._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
-import sifive.blocks.devices.gpio.GPIOPortIO
+import sifive.blocks.devices.spi._
 
 import chipyard._
 import chipyard.harness._
 
-class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
+class Arty100THarness(override implicit val p: Parameters) extends Arty100TMyShell { outer =>
+
   def dp = designParameters
 
-  val clockOverlay = dp(ClockInputOverlayKey).map(_.place(ClockInputDesignInput())).head
-  val harnessSysPLL = dp(PLLFactoryKey)
-  val harnessSysPLLNode = harnessSysPLL()
+  // place all clocks in the shell
+  require(dp(ClockInputOverlayKey).size >= 1)
+  val sysClkNode = dp(ClockInputOverlayKey).head.place(ClockInputDesignInput()).overlayOutput.node
+
+  /*** Connect/Generate clocks ***/
+
+  // connect to the PLL that with generate multiple clocks
+  val harnessSysPLL = dp(PLLFactoryKey)()
+  harnessSysPLL := sysClkNode
+
+  // create and connect to the dutClock
   val dutFreqMHz = (dp(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toInt
   val dutClock = ClockSinkNode(freqMHz = dutFreqMHz)
   println(s"Arty100T FPGA Base Clock Freq: ${dutFreqMHz} MHz")
-  val dutWrangler = LazyModule(new ResetWrangler())
+  val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
-  dutClock := dutWrangler.node := dutGroup := harnessSysPLLNode
+  dutClock := dutWrangler.node := dutGroup := harnessSysPLL
 
-  harnessSysPLLNode := clockOverlay.overlayOutput.node
+  /*** LED ***/
+  val ledModule = dp(LEDOverlayKey).map(_.place(LEDDesignInput()).overlayOutput.led)
 
-  val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
+  /*** JTAG ***/
+  val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
+
+  /*** UART ***/
+  // 1st UART goes to the VC707 dedicated UART
+  val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
+  dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
+
+  /*** SPI ***/
+  // 1st SPI goes to the VC707 SDIO port
+  val io_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
+  dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
+
+  /*** DDR ***/
+  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, true)).overlayOutput.ddr
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
-    name = "chip_ddr",
+    name = "chip_drr",
     sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
   )))))
-  val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
-  ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
+  ddrNode := ddrClient
 
-  val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
-  val all_leds = ledOverlays.map(_.overlayOutput.led)
-  val status_leds = all_leds.take(3)
-  val other_leds = all_leds.drop(3)
+  // module implementation
+  override lazy val module = new Arty100THarnessImp(this)
+}
 
+class Arty100THarnessImp(_outer: Arty100THarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
+  override def provideImplicitClockToLazyChildren: Boolean = true
+  val arty100tOuter = _outer
 
-  override lazy val module = new HarnessLikeImpl
+  val reset = IO(Input(Bool())).suggestName("reset")
+  _outer.xdc.addBoardPin(reset, "reset")
 
-  class HarnessLikeImpl extends Impl with HasHarnessInstantiators {
-    all_leds.foreach(_ := DontCare)
-    clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
+  val resetIBUF = Module(new IBUF)
+  resetIBUF.io.I := reset
 
-    val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock
+  val sysclk: Clock = _outer.sysClkNode.out.head._1.clock
 
-    // Blink the status LEDs for sanity
-    withClockAndReset(clk_100mhz, dutClock.in.head._1.reset) {
-      val period = (BigInt(100) << 20) / status_leds.size
-      val counter = RegInit(0.U(log2Ceil(period).W))
-      val on = RegInit(0.U(log2Ceil(status_leds.size).W))
-      status_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
-      counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
-      when (counter === 0.U) {
-        on := Mux(on === (status_leds.size-1).U, 0.U, on + 1.U)
-      }
-    }
+  // reset setup
+  val hReset = Wire(Reset())
+  hReset := _outer.dutClock.in.head._1.reset
 
-    other_leds(0) := resetPin
+  def referenceClockFreqMHz = _outer.dutFreqMHz
+  def referenceClock = _outer.dutClock.in.head._1.clock
+  def referenceReset = hReset
+  def success = { require(false, "Unused"); false.B }
 
-    harnessSysPLL.plls.foreach(_._1.getReset.get := pllReset)
+  childClock := referenceClock
+  childReset := referenceReset
 
-    def referenceClockFreqMHz = dutFreqMHz
-    def referenceClock = dutClock.in.head._1.clock
-    def referenceReset = dutClock.in.head._1.reset
-    def success = { require(false, "Unused"); false.B }
-
-    childClock := harnessBinderClock
-    childReset := harnessBinderReset
-
-    ddrOverlay.mig.module.clock := harnessBinderClock
-    ddrOverlay.mig.module.reset := harnessBinderReset
-    ddrBlockDuringReset.module.clock := harnessBinderClock
-    ddrBlockDuringReset.module.reset := harnessBinderReset.asBool || !ddrOverlay.mig.module.io.port.init_calib_complete
-
-    other_leds(6) := ddrOverlay.mig.module.io.port.init_calib_complete
-
-    instantiateChipTops()
-  }
+  instantiateChipTops()
 }

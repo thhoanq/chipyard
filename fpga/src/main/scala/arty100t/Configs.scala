@@ -61,9 +61,16 @@ class BringupArty100TConfig extends Config(
   new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.InternalSyncSerialPhyParams(freqMHz=50)) ++
   new chipyard.ChipBringupHostConfig)
 
+class WithDefaultPeripherals extends Config((site, here, up) => {
+  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
+})
+
 // custom SoC
 class FPGACustomSoC extends Config(
   new WithArty100TTweaks ++
-  new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.CustomSoC
+  new  WithDefaultPeripherals ++
+  new chipyard.config.WithBroadcastManager ++// no l2
+  new testchipip.soc.WithNoScratchpads ++
+  new freechips.rocketchip.rocket.WithNSmallCores(4) ++
+  new chipyard.config.AbstractConfig
 )
