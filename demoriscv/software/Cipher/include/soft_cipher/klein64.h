@@ -84,21 +84,21 @@ void klein64_encrypt_rounds(const uint8_t *plain, const uint8_t *key, const uint
 			state[7] = state[7] ^ round_key[7];
 
 			//key schedule;
-	        temp_state[0] = round_key[0];
-	        temp_state[1] = round_key[1];
-	        temp_state[2] = round_key[2];
-	        temp_state[3] = round_key[3];
-	        temp_state[4] = round_key[4];
+      temp_state[0] = round_key[0];
+      temp_state[1] = round_key[1];
+      temp_state[2] = round_key[2];
+      temp_state[3] = round_key[3];
+      temp_state[4] = round_key[4];
 
-	        round_key[0] = round_key[5];
-	        round_key[1] = round_key[6];
-	        round_key[2] = round_key[7] ^ i;
-	        round_key[3] = round_key[4];
+      round_key[0] = round_key[5];
+      round_key[1] = round_key[6];
+      round_key[2] = round_key[7] ^ i;
+      round_key[3] = round_key[4];
 
-	        round_key[4] = temp_state[1] ^ round_key[5];
-	        round_key[5] = sbox8[temp_state[2] ^ round_key[6]];
-	        round_key[6] = sbox8[temp_state[3] ^ round_key[7]];
-	        round_key[7] = temp_state[0] ^ temp_state[4];
+      round_key[4] = temp_state[1] ^ round_key[5];
+      round_key[5] = sbox8[temp_state[2] ^ round_key[6]];
+      round_key[6] = sbox8[temp_state[3] ^ round_key[7]];
+      round_key[7] = temp_state[0] ^ temp_state[4];
 
 
 			//substitute nibbles with the byte-oriented sbox;
@@ -111,9 +111,9 @@ void klein64_encrypt_rounds(const uint8_t *plain, const uint8_t *key, const uint
 			state[6] = sbox8[state[6]];
 			state[7] = sbox8[state[7]];
 
-	        //the RotateNibbles step, left shift two bytes;
+      //the RotateNibbles step, left shift two bytes;
 			temp_state[0] = state[2];
-		    temp_state[1] = state[3];
+      temp_state[1] = state[3];
 			temp_state[2] = state[4];
 			temp_state[3] = state[5];
 			temp_state[4] = state[6];
@@ -121,40 +121,40 @@ void klein64_encrypt_rounds(const uint8_t *plain, const uint8_t *key, const uint
 			temp_state[6] = state[0];
 			temp_state[7] = state[1];
 
-            //an efficient MixNibbles implementation for AES, Book Page 54;
-            u = temp_state[0] ^ temp_state[1] ^ temp_state[2] ^ temp_state[3];
-            v = temp_state[0] ^ temp_state[1];
-            v = multiply2[v];
-            state[0] = temp_state[0] ^ v ^ u;
+      //an efficient MixNibbles implementation for AES, Book Page 54;
+      u = temp_state[0] ^ temp_state[1] ^ temp_state[2] ^ temp_state[3];
+      v = temp_state[0] ^ temp_state[1];
+      v = multiply2[v];
+      state[0] = temp_state[0] ^ v ^ u;
 
-            v = temp_state[1] ^ temp_state[2];
-            v = multiply2[v];
-            state[1] = temp_state[1] ^ v ^ u;
+      v = temp_state[1] ^ temp_state[2];
+      v = multiply2[v];
+      state[1] = temp_state[1] ^ v ^ u;
 
-            v = temp_state[2] ^ temp_state[3];
-            v = multiply2[v];
-            state[2] = temp_state[2] ^ v ^ u;
+      v = temp_state[2] ^ temp_state[3];
+      v = multiply2[v];
+      state[2] = temp_state[2] ^ v ^ u;
 
-            v = temp_state[3] ^ temp_state[0];
-            v = multiply2[v];
-            state[3] = temp_state[3] ^ v ^ u;
+      v = temp_state[3] ^ temp_state[0];
+      v = multiply2[v];
+      state[3] = temp_state[3] ^ v ^ u;
 
-            u = temp_state[4] ^ temp_state[5] ^ temp_state[6] ^ temp_state[7];
-            v = temp_state[4] ^ temp_state[5];
-            v = multiply2[v];
-            state[4] = temp_state[4] ^ v ^ u;
+      u = temp_state[4] ^ temp_state[5] ^ temp_state[6] ^ temp_state[7];
+      v = temp_state[4] ^ temp_state[5];
+      v = multiply2[v];
+      state[4] = temp_state[4] ^ v ^ u;
 
-            v = temp_state[5] ^ temp_state[6];
-            v = multiply2[v];
-            state[5] = temp_state[5] ^ v ^ u;
+      v = temp_state[5] ^ temp_state[6];
+      v = multiply2[v];
+      state[5] = temp_state[5] ^ v ^ u;
 
-            v = temp_state[6] ^ temp_state[7];
-            v = multiply2[v];
-            state[6] = temp_state[6] ^ v ^ u;
+      v = temp_state[6] ^ temp_state[7];
+      v = multiply2[v];
+      state[6] = temp_state[6] ^ v ^ u;
 
-            v = temp_state[7] ^ temp_state[4];
-            v = multiply2[v];
-            state[7] = temp_state[7] ^ v ^ u;
+      v = temp_state[7] ^ temp_state[4];
+      v = multiply2[v];
+      state[7] = temp_state[7] ^ v ^ u;
 
 		}
 
@@ -191,22 +191,21 @@ void klein64_decrypt_rounds(const uint8_t *cipher, const uint8_t *key, const uin
 	//key expansion
 	for(i = 1; i <= rounds; i++)
 	{
-        temp_state[0] = round_key[0];
-        temp_state[1] = round_key[1];
-        temp_state[2] = round_key[2];
-        temp_state[3] = round_key[3];
-        temp_state[4] = round_key[4];
+    temp_state[0] = round_key[0];
+    temp_state[1] = round_key[1];
+    temp_state[2] = round_key[2];
+    temp_state[3] = round_key[3];
+    temp_state[4] = round_key[4];
 
-        round_key[0] = round_key[5];
-        round_key[1] = round_key[6];
-        round_key[2] = round_key[7] ^ i;
-        round_key[3] = round_key[4];
+    round_key[0] = round_key[5];
+    round_key[1] = round_key[6];
+    round_key[2] = round_key[7] ^ i;
+    round_key[3] = round_key[4];
 
-        round_key[4] = temp_state[1] ^ round_key[5];
-        round_key[5] = sbox8[temp_state[2] ^ round_key[6]];
-        round_key[6] = sbox8[temp_state[3] ^ round_key[7]];
-        round_key[7] = temp_state[0] ^ temp_state[4];
-
+    round_key[4] = temp_state[1] ^ round_key[5];
+    round_key[5] = sbox8[temp_state[2] ^ round_key[6]];
+    round_key[6] = sbox8[temp_state[3] ^ round_key[7]];
+    round_key[7] = temp_state[0] ^ temp_state[4];
 	}
 
 	state[0] = cipher[0] ^ round_key[0];
@@ -247,41 +246,41 @@ void klein64_decrypt_rounds(const uint8_t *cipher, const uint8_t *key, const uin
 		temp_state[6] = temp_state[6] ^ u;
 		temp_state[7] = temp_state[7] ^ v;
 
-        u = temp_state[0] ^ temp_state[1] ^ temp_state[2] ^ temp_state[3];
-        v = temp_state[0] ^ temp_state[1];
-        v = multiply2[v];
-        state[2] = temp_state[0] ^ v ^ u;
+    u = temp_state[0] ^ temp_state[1] ^ temp_state[2] ^ temp_state[3];
+    v = temp_state[0] ^ temp_state[1];
+    v = multiply2[v];
+    state[2] = temp_state[0] ^ v ^ u;
 
-        v = temp_state[1] ^ temp_state[2];
-        v = multiply2[v];
-        state[3] = temp_state[1] ^ v ^ u;
+    v = temp_state[1] ^ temp_state[2];
+    v = multiply2[v];
+    state[3] = temp_state[1] ^ v ^ u;
 
-        v = temp_state[2] ^ temp_state[3];
-        v = multiply2[v];
-        state[4] = temp_state[2] ^ v ^ u;
+    v = temp_state[2] ^ temp_state[3];
+    v = multiply2[v];
+    state[4] = temp_state[2] ^ v ^ u;
 
-        v = temp_state[3] ^ temp_state[0];
-        v = multiply2[v];
-        state[5] = temp_state[3] ^ v ^ u;
+    v = temp_state[3] ^ temp_state[0];
+    v = multiply2[v];
+    state[5] = temp_state[3] ^ v ^ u;
 
-        u = temp_state[4] ^ temp_state[5] ^ temp_state[6] ^ temp_state[7];
-        v = temp_state[4] ^ temp_state[5];
-        v = multiply2[v];
-        state[6] = temp_state[4] ^ v ^ u;
+    u = temp_state[4] ^ temp_state[5] ^ temp_state[6] ^ temp_state[7];
+    v = temp_state[4] ^ temp_state[5];
+    v = multiply2[v];
+    state[6] = temp_state[4] ^ v ^ u;
 
-        v = temp_state[5] ^ temp_state[6];
-        v = multiply2[v];
-        state[7] = temp_state[5] ^ v ^ u;
+    v = temp_state[5] ^ temp_state[6];
+    v = multiply2[v];
+    state[7] = temp_state[5] ^ v ^ u;
 
-        v = temp_state[6] ^ temp_state[7];
-        v = multiply2[v];
-        state[0] = temp_state[6] ^ v ^ u;
+    v = temp_state[6] ^ temp_state[7];
+    v = multiply2[v];
+    state[0] = temp_state[6] ^ v ^ u;
 
-        v = temp_state[7] ^ temp_state[4];
-        v = multiply2[v];
-        state[1] = temp_state[7] ^ v ^ u;
+    v = temp_state[7] ^ temp_state[4];
+    v = multiply2[v];
+    state[1] = temp_state[7] ^ v ^ u;
 
-        //inverse the SubNibbles step;
+    //inverse the SubNibbles step;
 		state[0] = sbox8[state[0]];
 		state[1] = sbox8[state[1]];
 		state[2] = sbox8[state[2]];
@@ -329,5 +328,53 @@ void klein64_decrypt_rounds(const uint8_t *cipher, const uint8_t *key, const uin
 	plain[6] = state[6];
 	plain[7] = state[7];
 
+}
+
+static void klein_test_software() {
+    uint8_t key[8] = {0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef};
+    uint8_t message[8] = {0xde, 0xad, 0xbe, 0xef, 0xf0, 0x00, 0x00, 0x0f};
+    uint8_t cipher[8];
+    uint8_t decrypted[8];
+//    uint8_t cipher_text[8];
+//    uint8_t decipher_text[8];
+
+    // Measure encryption time using mytimer
+    unsigned long _encryption_cycles = -read_csr(mcycle); // Start counter
+    klein64_encrypt(message, key, cipher);
+    _encryption_cycles += read_csr(mcycle); // End counter
+
+//    cipher_text[0] = cipher[0];
+//    cipher_text[1] = cipher[1];
+//    cipher_text[2] = cipher[2];
+//    cipher_text[3] = cipher[3];
+//    cipher_text[4] = cipher[4];
+//    cipher_text[5] = cipher[5];
+//    cipher_text[6] = cipher[6];
+//    cipher_text[7] = cipher[7];
+
+    // Measure decryption time using mytimer
+    unsigned long _decryption_cycles = -read_csr(mcycle); // Start counter
+    klein64_decrypt(cipher, key, decrypted);
+    _decryption_cycles += read_csr(mcycle); // End counter
+
+//    decipher_text[0] = decrypted[0];
+//    decipher_text[1] = decrypted[1];
+//    decipher_text[2] = decrypted[2];
+//    decipher_text[3] = decrypted[3];
+//    decipher_text[4] = decrypted[4];
+//    decipher_text[5] = decrypted[5];
+//    decipher_text[6] = decrypted[6];
+//    decipher_text[7] = decrypted[7];
+
+    // Print results
+    kprintf("# KLEIN-64 - Software Implementation  ===============================\r\n");
+    kprintf("Executed cycles for encryption: %d\r\n", _encryption_cycles);
+//    kprintf("Cipher text:       ");
+//    for (int i = 0; i < 8; i++) kprintf("%hx", cipher_text[i]);
+//    kprintf("\r\n");
+    kprintf("Executed cycles for decryption: %d\r\n", _decryption_cycles);
+//    kprintf("Decrypted text:    ");
+//    for (int i = 0; i < 8; i++) kprintf("%hx", decipher_text[i]);
+    kprintf("\r\n");
 }
 #endif /* KLEIN64_H_ */

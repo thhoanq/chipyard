@@ -26,7 +26,6 @@
 #define CHACHA_KEYLEN_256 		     0x01
 
 
-
 static void chacha_soft_reset() {
   reg_write32(CHACHA_control, CTRL_CHACHA_RESET);
   reg_write32(CHACHA_control, CTRL_CHACHA_IDLE);
@@ -76,9 +75,6 @@ static void chacha_cipher(
         data_out[i] = chacha_read_from_address(CHACHA_ADDR_DATA_OUT_BASE + i);
 }
 
-
-
-
 static void chacha_cipher_next_block(unsigned int *data_out) {
     chacha_write_to_address(CHACHA_ADDR_CTRL, 0x02);
 
@@ -87,11 +83,6 @@ static void chacha_cipher_next_block(unsigned int *data_out) {
     for (int i = 0; i < 16; ++i)
         data_out[i] = chacha_read_from_address(CHACHA_ADDR_DATA_OUT_BASE + i);
 }
-
-
-
-
-
 
 static void chacha_test_cases() {
   unsigned int chacha_key[8] 	= {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
@@ -114,10 +105,7 @@ static void chacha_test_cases() {
 			0xb64ab8e7, 0x2b8deb85, 0xcd6aea7c, 0xb6089a10,
 			0x1824beeb, 0x08814a42, 0x8aab1fa2, 0xc816081b};
 
-
-
-
-    // ================================= TEST ONE =================================
+  // ================================= TEST ONE =================================
 
   chacha_cipher(CHACHA_KEYLEN_128, chacha_key, chacha_iv, 0x08, chacha_data_in, chacha_dump);
 
@@ -139,8 +127,6 @@ static void chacha_test_cases() {
 	    kprintf("%x", chacha_dump[i]);
 
   kprintf("\r\n\r\n");
-
-
 
   // ================================= TEST TWO =================================
   chacha_key[0] = 0x00;
@@ -193,8 +179,6 @@ static void chacha_test_cases() {
 
   kprintf("\r\n\r\n");
 
-
-
   chacha_cipher_next_block(chacha_dump);
 
   kprintf("# ChaCha - 20 rounds, 256-bit key, next block ================================\r\n");
@@ -206,9 +190,41 @@ static void chacha_test_cases() {
 	    kprintf("%x", chacha_dump[i]);
 
   kprintf("\r\n\r\n");
-
 }
 
+static void chacha_test_elapsed() {
+  unsigned int chacha_key[8] 	= {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+	unsigned int chacha_iv[2] 	= {0x0, 0x0};
+	unsigned int chacha_data_in[16] 	= {
+			0x0, 0x0, 0x0, 0x0,
+			0x0, 0x0, 0x0, 0x0,
+			0x0, 0x0, 0x0, 0x0,
+			0x0, 0x0, 0x0, 0x0};
 
+  for (int i = 0; i < 8; ++i)
+      chacha_write_to_address(CHACHA_ADDR_KEY_BASE + i, chacha_key[i]);
+
+  for (int i = 0; i < 16; ++i)
+      chacha_write_to_address(CHACHA_ADDR_DATA_IN_BASE + i, chacha_data_in[i]);
+
+  chacha_write_to_address(CHACHA_ADDR_IV0, chacha_iv[0]);
+  chacha_write_to_address(CHACHA_ADDR_IV1, chacha_iv[1]);
+
+  chacha_write_to_address(CHACHA_ADDR_KEYLEN, CHACHA_KEYLEN_256);
+  chacha_write_to_address(CHACHA_ADDR_ROUNDS, 0x14);
+
+  // ====================================================
+
+  chacha_write_to_address(CHACHA_ADDR_CTRL, 0x01);
+  unsigned long count_cycles = -read_csr(mcycle); // Start counter
+
+  while(chacha_read_from_address(CHACHA_ADDR_STATUS) == 0);
+  count_cycles += read_csr(mcycle);
+  // ====================================================
+
+  kprintf("# ChaCha20 - Cryptography Accelerator ===============================\r\n");
+  kprintf("Elapsed cycles: %d\r\n", count_cycles);
+
+}
 
 

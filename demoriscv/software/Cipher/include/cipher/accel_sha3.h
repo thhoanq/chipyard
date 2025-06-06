@@ -1,9 +1,9 @@
 #include "mmio.h"
 
-#define SHA3_control  0x10007000     // Bit high to low: reset-we-cs
-#define SHA3_addr     0x10007004
-#define SHA3_write    0x10007008
-#define SHA3_read     0x1000700C
+#define SHA3_control  0x10008000     // Bit high to low: reset-we-cs
+#define SHA3_addr     0x10008004
+#define SHA3_write    0x10008008
+#define SHA3_read     0x1000800C
 
 #define CTRL_SHA3_RESET   0x04
 #define CTRL_SHA3_WRITE   0x03
@@ -52,7 +52,7 @@ static void sha3_512_hash(unsigned int *message, unsigned int msg_len_word, unsi
 	sha3_write_to_address(SHA3_ADDR_IN_LAST, message[msg_len_word - 1]);
 
 	while(sha3_read_from_address(SHA3_ADDR_STATUS) == 0);
-  kprintf("STATUS: %w\r\n", sha3_read_from_address(SHA3_ADDR_STATUS));
+//  kprintf("STATUS: %w\r\n", sha3_read_from_address(SHA3_ADDR_STATUS));
 
 	for(i = 0; i < 16; i++)
 		digest[i] = sha3_read_from_address(SHA3_ADDR_DIGEST_BASE + i);
@@ -120,4 +120,23 @@ static void sha3_test_cases() {
 
 
 	kprintf("\r\n\r\n");
+}
+
+static void sha3_test_elapsed() {
+  unsigned int message_4[5] = {
+              0x48434D55, 0x53204645, 0x54454C20, 0x4445534C,
+              0x41420000};
+
+  unsigned int digest[16] = {
+              0x00, 0x00, 0x00, 0x00,
+              0x00, 0x00, 0x00, 0x00,
+              0x00, 0x00, 0x00, 0x00,
+              0x00, 0x00, 0x00, 0x00};
+
+  unsigned long count_cycles = -read_csr(mcycle); // Start counter
+  sha3_512_hash(message_4, 5, 2, digest);
+  count_cycles += read_csr(mcycle);
+
+  kprintf("# SHA3-512 - Cryptography Accelerator ===============================\r\n");
+  kprintf("Elapsed cycles: %d\r\n", count_cycles);
 }

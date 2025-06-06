@@ -55,6 +55,7 @@ int main(void) {
   for (volatile int i = 0; i < 1000000; i++) { }
 
   unsigned long _c = -read_csr(mcycle); // Start counter
+//  unsigned long _i = -read_csr(minstret);
   // Call secondary harts
   CLINT_REG(CLINT_MSIP1) = CLINT_MSIPEN; // call hart 1
   CLINT_REG(CLINT_MSIP2) = CLINT_MSIPEN; // call hart 2
@@ -63,8 +64,10 @@ int main(void) {
   matmul(mhartid, n_cores, DIM_SIZE, input1_data, input2_data, results_data);
   barrier(n_cores);
   _c += read_csr(mcycle); // End counter
+//  _i += read_csr(minstret);
 
   kprintf("\r\nDoing matrix multiplication in %d cycles.\r\n", _c);
+//  kprintf("\r\nDoing matrix multiplication in %d inst-ret.\r\n", _i);
 
   // Verify
   int res = verify(ARRAY_SIZE, results_data, verify_data);

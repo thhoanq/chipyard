@@ -45,7 +45,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TMyShe
   val ledModule = dp(LEDOverlayKey).map(_.place(LEDDesignInput()).overlayOutput.led)
 
   /*** JTAG ***/
-  val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
+//  val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
 
   /*** UART ***/
   // 1st UART goes to the VC707 dedicated UART

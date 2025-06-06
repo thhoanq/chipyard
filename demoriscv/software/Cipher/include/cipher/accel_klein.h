@@ -1,15 +1,12 @@
 #include "mmio.h"
-#include "kprintf.h"
 
 #include "../timer/mytimer.h"
 #include "../soft_cipher/klein64.h"
 
-//#include "klein64.h"
-
-#define KLEIN_TRIGGER   0x00006000
-#define KLEIN_DATA_A    0x00006004
-#define KLEIN_DATA_B    0x00006008
-#define KLEIN_DATA_C    0x0000600C
+#define KLEIN_TRIGGER   0x10006000
+#define KLEIN_DATA_A    0x10006004
+#define KLEIN_DATA_B    0x10006008
+#define KLEIN_DATA_C    0x1000600C
 
 #define KLEIN_ADDR_CTRL     0x00
 #define KLEIN_ADDR_CONF     0x01
@@ -87,8 +84,6 @@ void klein_test(void)
 }
 
 void klein_test_encryption_elapsed() {
-    uint32_t count_cycles = 0;
-
     // Reset the KLEIN cipher
     reg_write32(KLEIN_TRIGGER, 0x00010000);
     reg_write32(KLEIN_TRIGGER, 0x00000000);
@@ -105,30 +100,27 @@ void klein_test_encryption_elapsed() {
     klein_write_to_address(KLEIN_ADDR_CONF, 0x01);
 
     // Start measuring time
-    mytimer_soft_reset();
     klein_write_to_address(KLEIN_ADDR_CTRL, 0x02);
-    mytimer_start();
+    unsigned long _encryption_cycles = -read_csr(mcycle);
 
     // Wait for encryption to complete
     while (!(klein_read_to_address(KLEIN_ADDR_STATUS) == 0x03));
 
     // Stop the timer and get elapsed cycles
-    count_cycles = mytimer_pause_and_return();
+    _encryption_cycles += read_csr(mcycle);
 
     // Get result
-    uint32_t cipher_1, cipher_2;
-    cipher_1 = klein_read_to_address(KLEIN_ADDR_RESULT0);
-    cipher_2 = klein_read_to_address(KLEIN_ADDR_RESULT1);
+//    uint32_t cipher_1, cipher_2;
+//    cipher_1 = klein_read_to_address(KLEIN_ADDR_RESULT0);
+//    cipher_2 = klein_read_to_address(KLEIN_ADDR_RESULT1);
 
     // Print results
-    kprintf("\r\n# ELAPSED - KLEIN-64 Cipher Encryption ======================\r\n");
-    kprintf("Elapsed cycles: %d\r\n", count_cycles);
-    kprintf("Cipher text:    %w%w\r\n", cipher_1, cipher_2);
+//    kprintf("\r\n# ELAPSED - KLEIN-64 Cipher Encryption ======================\r\n");
+    kprintf("Executed cycles for encryption: %d\r\n", _encryption_cycles);
+//    kprintf("Cipher text:    %w%w\r\n", cipher_1, cipher_2);
 }
 
 void klein_test_decryption_elapsed() {
-    uint32_t count_cycles = 0;
-
     // Reset the KLEIN cipher
     reg_write32(KLEIN_TRIGGER, 0x00010000);
     reg_write32(KLEIN_TRIGGER, 0x00000000);
@@ -148,9 +140,8 @@ void klein_test_decryption_elapsed() {
     klein_write_to_address(KLEIN_ADDR_CONF, 0x00);
 
     // Start measuring time
-    mytimer_soft_reset();
     klein_write_to_address(KLEIN_ADDR_CTRL, 0x01);
-    mytimer_start();
+    unsigned long _decryption_cycles = -read_csr(mcycle);
 
     // Wait for keyschedule ready
     while (!(klein_read_to_address(KLEIN_ADDR_STATUS) == 0x01));
@@ -162,65 +153,15 @@ void klein_test_decryption_elapsed() {
     while (!(klein_read_to_address(KLEIN_ADDR_STATUS) == 0x03));
 
     // Stop the timer and get elapsed cycles
-    count_cycles = mytimer_pause_and_return();
+    _decryption_cycles += read_csr(mcycle);
 
     // Get result
-    uint32_t decipher_1, decipher_2;
-    decipher_1 = klein_read_to_address(KLEIN_ADDR_RESULT0);
-    decipher_2 = klein_read_to_address(KLEIN_ADDR_RESULT1);
+//    uint32_t decipher_1, decipher_2;
+//    decipher_1 = klein_read_to_address(KLEIN_ADDR_RESULT0);
+//    decipher_2 = klein_read_to_address(KLEIN_ADDR_RESULT1);
 
     // Print results
-    kprintf("\r\n# ELAPSED - KLEIN-64 Cipher Decryption ======================\r\n");
-    kprintf("Elapsed cycles: %d\r\n", count_cycles);
-    kprintf("Decipher text:  %w%w\r\n", decipher_1, decipher_2);
-}
-
-static void klein_test_software() {
-    uint8_t key[8] = {0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef};
-    uint8_t message[8] = {0xde, 0xad, 0xbe, 0xef, 0xf0, 0x00, 0x00, 0x0f};
-    uint8_t cipher[8];
-    uint8_t decrypted[8];
-    unsigned int encryption_cycles, decryption_cycles;
-    uint8_t cipher_text[8];
-    uint8_t decipher_text[8];
-
-    // Measure encryption time using mytimer
-    mytimer_soft_reset();
-    mytimer_start();
-    klein64_encrypt(message, key, cipher);
-    encryption_cycles = mytimer_pause_and_return();
-
-    cipher_text[0] = cipher[0];
-    cipher_text[1] = cipher[1];
-    cipher_text[2] = cipher[2];
-    cipher_text[3] = cipher[3];
-    cipher_text[4] = cipher[4];
-    cipher_text[5] = cipher[5];
-    cipher_text[6] = cipher[6];
-    cipher_text[7] = cipher[7];
-
-    // Measure decryption time using mytimer
-    mytimer_soft_reset();
-    mytimer_start();
-    klein64_decrypt(cipher, key, decrypted);
-    decryption_cycles = mytimer_pause_and_return();
-
-    decipher_text[0] = decrypted[0];
-    decipher_text[1] = decrypted[1];
-    decipher_text[2] = decrypted[2];
-    decipher_text[3] = decrypted[3];
-    decipher_text[4] = decrypted[4];
-    decipher_text[5] = decrypted[5];
-    decipher_text[6] = decrypted[6];
-    decipher_text[7] = decrypted[7];
-
-    // Print results
-    kprintf("\r\n# ELAPSED - KLEIN-64 Software ===============================\r\n");
-    kprintf("Encryption Cycles: %d\r\n", encryption_cycles);
-    kprintf("Cipher text:       ");
-    for (int i = 0; i < 8; i++) kprintf("%hx", cipher_text[i]);
-    kprintf("\r\nDecryption Cycles: %d\r\n", decryption_cycles);
-    kprintf("Decrypted text:    ");
-    for (int i = 0; i < 8; i++) kprintf("%hx", decipher_text[i]);
-    kprintf("\r\n\r\n");
+//    kprintf("\r\n# ELAPSED - KLEIN-64 Cipher Decryption ======================\r\n");
+    kprintf("Executed cycles for decryption: %d\r\n", _decryption_cycles);
+//    kprintf("Decipher text:  %w%w\r\n", decipher_1, decipher_2);
 }

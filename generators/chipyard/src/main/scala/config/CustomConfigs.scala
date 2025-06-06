@@ -10,7 +10,7 @@ import constellation.noc._
 
 import scala.collection.immutable.ListMap
 
-class PeripheralConfig(gpio: Int = 8) extends Config(
+class PeripheralConfig extends Config(
 //  new chipyard.cipher.WithMyTimer(address = 0x1000E000) ++
   new chipyard.cipher.WithAES(address = 0x10008000) ++
   new chipyard.cipher.WithSHA3(address = 0x10007000) ++
@@ -35,86 +35,30 @@ class GCDTLBlackBoxRocketConfig extends Config(
 //    new chipyard.cipher.WithKLEIN(address = 0x10006000) ++
     new chipyard.cipher.WithASCON(address = 0x10006000) ++
     new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-    new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+    new freechips.rocketchip.rocket.WithNBigCores(1) ++
     new chipyard.config.AbstractConfig)
 // DOC include end: GCDTLBlackBoxRocketConfig
 
 class CustomSoC extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new PeripheralConfig(8) ++
+  new PeripheralConfig ++
   new chipyard.config.WithNoUART ++
   new testchipip.soc.WithNoScratchpads ++
   new freechips.rocketchip.rocket.WithNBigCores(4) ++
   new chipyard.config.AbstractConfig
 )
 
-class SingleCoreSoC extends Config(
+class ThesisSoC extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new PeripheralConfig(1) ++
+  new chipyard.cipher.WithSHA3(address = 0x10008000) ++
+  new chipyard.cipher.WithChaCha(address = 0x10007000) ++
+  new chipyard.cipher.WithKLEIN(address = 0x10006000) ++
   new chipyard.config.WithNoUART ++
   new testchipip.soc.WithNoScratchpads ++
-  new freechips.rocketchip.rocket.WithNMedCores(1) ++
+  new freechips.rocketchip.rocket.WithNBigCores(4) ++
   new chipyard.config.AbstractConfig
 )
 
-// DOC include start TestConfigSoC
-class QuadCoreSoC extends Config(
-  new constellation.soc.WithSbusNoC(constellation.protocol.SimpleTLNoCParams(
-    constellation.protocol.DiplomaticNetworkNodeMapping(
-      inNodeMapping = ListMap(
-        "Core 0" -> 0, "Core 1" -> 1,
-        "Core 2" -> 3, "Core 3" -> 4,
-        "serial_tl" -> 2),
-      outNodeMapping = ListMap(
-        "system[0]" -> 2,
-        "pbus" -> 2)),
-    nocParams = NoCParams(
-      topology = BidirectionalTorus1D(5),
-      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
-      routingRelation = NonblockingVirtualSubnetworksRouting(BidirectionalTorus1DShortestRouting(), 5, 2))
-  )) ++
-  new freechips.rocketchip.subsystem.WithDefaultMemPort ++
-  new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new freechips.rocketchip.rocket.WithRV32 ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new testchipip.soc.WithNoScratchpads ++
-  new freechips.rocketchip.rocket.WithNSmallCores(4) ++
-  new chipyard.config.AbstractConfig
-)
-// DOC include end TestConfigSoC
-
-class DualCoreSoC extends Config(
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new PeripheralConfig(8) ++
-  new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new chipyard.config.WithNoUART ++
-  new testchipip.soc.WithNoScratchpads ++
-  new freechips.rocketchip.rocket.WithNMedCores(2) ++
-  new chipyard.config.AbstractConfig
-)
-
-class DualCoreNoC extends Config(
-  new constellation.soc.WithSbusNoC(constellation.protocol.SimpleTLNoCParams(
-    constellation.protocol.DiplomaticNetworkNodeMapping(
-      inNodeMapping = ListMap(
-        "Core 0" -> 0, "Core 1" -> 1,
-        "serial_tl" -> 2),
-      outNodeMapping = ListMap(
-        "system[0]" -> 3,
-        "pbus" -> 2)),
-    nocParams = NoCParams(
-      topology = Mesh2D(nX = 2, nY = 2),
-      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
-      routingRelation = NonblockingVirtualSubnetworksRouting(Mesh2DDimensionOrderedRouting(), 5, 2))
-  )) ++
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new PeripheralConfig(8) ++
-  new freechips.rocketchip.subsystem.WithNoMemPort ++
-  new chipyard.config.WithNoUART ++
-  new testchipip.soc.WithNoScratchpads ++
-  new freechips.rocketchip.rocket.WithNMedCores(2) ++
-  new chipyard.config.AbstractConfig
-)
 
 // DOC include start: QuadCoreRing
 class QuadCoreRing extends Config(
@@ -132,10 +76,11 @@ class QuadCoreRing extends Config(
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
       routingRelation = NonblockingVirtualSubnetworksRouting(BidirectionalTorus1DShortestRouting(), 5, 2))
   )) ++
-  new CustomSoC ++
+  new ThesisSoC ++
   new chipyard.config.AbstractConfig
 )
 // DOC include end: QuadCoreRing
+
 
 // DOC include start: QuadCoreMesh
 class QuadCoreMesh extends Config(

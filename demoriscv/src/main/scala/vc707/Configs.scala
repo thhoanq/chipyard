@@ -8,7 +8,7 @@ import sifive.blocks.devices.gpio.{GPIOParams, PeripheryGPIOKey}
 import sifive.blocks.devices.i2c.{I2CParams, PeripheryI2CKey}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
-import sifive.fpgashells.shell.xilinx.VC7074GDDRSize
+import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize, VC7071GDDRSize}
 import testchipip.serdes.SerialTLKey
 
 import scala.sys.process._
@@ -32,7 +32,7 @@ class WithSystemModifications extends Config((site, here, up) => {
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./demoriscv/src/main/resources/bootROM/MTBoot/build/sdboot.bin")
   }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7071GDDRSize)))) // set extmem to DDR size (note the size)
   case SerialTLKey => Nil // remove serialized tl port
 })
 
@@ -62,19 +62,26 @@ class WithVC707Tweaks extends Config (
     new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )
 
-class RocketVC707Config extends Config (
-  new WithVC707Tweaks ++
-    new chipyard.RocketConfig
-)
 
-class QuadCoreVC707Config extends Config (
+// DOC include start: QuadCoreNoCVC707Config
+class QuadCoreNoCVC707Config extends Config (
   new WithVC707Tweaks ++
   new chipyard.QuadCoreRing
 )
+// DOC include end: QuadCoreNoCVC707Config
+
+// DOC include start: QuadCoreXBarVC707Config
+class QuadCoreXBarVC707Config extends Config (
+  new WithVC707Tweaks++
+  new chipyard.ThesisSoC
+)
+// DOC include end: QuadCoreXBarVC707Config
 
 class TestVC707Config extends Config (
   new WithVC707Tweaks ++
-  new chipyard.GCDTLBlackBoxRocketConfig
+    new chipyard.cipher.WithBLAKE2S(address = 0x10008000) ++
+    new freechips.rocketchip.rocket.WithNBigCores(1) ++
+    new chipyard.config.AbstractConfig
 )
 
 class InternshipConfig extends Config (
@@ -85,12 +92,6 @@ class InternshipConfig extends Config (
   new testchipip.soc.WithNoScratchpads ++
   new freechips.rocketchip.rocket.WithNSmallCores(1) ++
   new chipyard.config.AbstractConfig
-)
-
-class BoomVC707Config extends Config (
-  new WithFPGAFrequency(50) ++
-    new WithVC707Tweaks ++
-    new chipyard.MegaBoomV3Config
 )
 
 class HeteroCoreConfig extends Config (
