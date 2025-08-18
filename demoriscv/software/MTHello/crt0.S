@@ -22,7 +22,7 @@ _setup:                             // hart 0 setup only
     li      t1, (UART_CTRL_ADDR + UART_REG_TXCTRL)
     sw      t0, 0(t1)
 _entry:
-    csrw    mie, zero               // ensure no new interrupt wile harts set up their stacks and move to main()
+    csrw    mie, zero               // ensure no new interrupt while harts set up their stacks and move to main()
     csrr    a0, mhartid             // a0 is the first function argument of main()
     addi    a1, a0, 1               // sp = SCRATCH_TOP - (hartid+1)*STACK_SIZE + (STACK_SIZE-16)
     slli    a1, a1, STACK_SHIFT

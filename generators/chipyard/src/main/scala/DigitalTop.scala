@@ -42,6 +42,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with chipyard.cipher.CanHavePeripheralSHA3
   with chipyard.cipher.CanHavePeripheralAES
   with chipyard.cipher.CanHavePeripheralASCON
+  with chipyard.cipher.CanHavePeripheralPOLY1305
   with chipyard.cipher.CanHavePeripheryMyTimer // Enable MyTimer accelerator
   with chipyard.example.CanHavePeripheryStreamingFIR // Enables optionally adding the DSPTools FIR example widget
   with chipyard.example.CanHavePeripheryStreamingPassthrough // Enables optionally adding the DSPTools streaming-passthrough example widget

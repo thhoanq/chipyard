@@ -87,7 +87,7 @@ static void sha3_test_cases() {
 							0x00, 0x00, 0x00, 0x00};
 
 
-  kprintf("STATUS: %w\r\n", sha3_read_from_address(SHA3_ADDR_STATUS));
+//  kprintf("STATUS: %w\r\n", sha3_read_from_address(SHA3_ADDR_STATUS));
 
 	// ============================= TEST 1 =============================
 	// "The quick brown fox jumps over the lazy dog "

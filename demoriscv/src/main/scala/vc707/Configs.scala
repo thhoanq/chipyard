@@ -5,7 +5,6 @@ import freechips.rocketchip.resources.DTSTimebase
 import freechips.rocketchip.subsystem.{ExtMem, SystemBusKey}
 import org.chipsalliance.cde.config.Config
 import sifive.blocks.devices.gpio.{GPIOParams, PeripheryGPIOKey}
-import sifive.blocks.devices.i2c.{I2CParams, PeripheryI2CKey}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize, VC7071GDDRSize}
@@ -47,6 +46,7 @@ class WithVC707Tweaks extends Config (
     // harness binders
     new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
     //  new WithVC707JTAGHarnessBinder ++
+    new WithVC707JTAGHarnessBinder ++
     new WithVC707UARTHarnessBinder ++
     new WithVC707SPISDCardHarnessBinder ++
     new WithVC707DDRMemHarnessBinder ++
@@ -57,7 +57,7 @@ class WithVC707Tweaks extends Config (
     new WithDefaultPeripherals ++
     new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
     new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-    new chipyard.config.WithNoDebug ++ // remove debug module
+//    new chipyard.config.WithNoDebug ++ // remove debug module
     new freechips.rocketchip.subsystem.WithoutTLMonitors ++
     new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )
@@ -79,9 +79,9 @@ class QuadCoreXBarVC707Config extends Config (
 
 class TestVC707Config extends Config (
   new WithVC707Tweaks ++
-    new chipyard.cipher.WithBLAKE2S(address = 0x10008000) ++
-    new freechips.rocketchip.rocket.WithNBigCores(1) ++
-    new chipyard.config.AbstractConfig
+//  new chipyard.cipher.WithPOLY1305(address = 0x10008000) ++
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig
 )
 
 class InternshipConfig extends Config (

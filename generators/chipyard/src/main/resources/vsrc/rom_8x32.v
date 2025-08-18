@@ -1,5 +1,5 @@
 /**
- * 	Module "ROM - Read-Only-Memory" for testing in LiteXs
+ * 	Module "ROM - Read-Only-Memory" for testing
  **/
 
 module rom_8x32(

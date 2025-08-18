@@ -38,3 +38,16 @@ class WithVC707DDRMemHarnessBinder extends HarnessBinder({
     ddrClientBundle <> port.io
   }
 })
+
+/*** JTAG ***/
+class WithVC707JTAGHarnessBinder extends HarnessBinder({
+  case (th: VC707HarnessImp, port: JTAGPort, chipId: Int) => {
+    val shellJTAGIO = th.vc707Outer.jtagModule
+
+    port.io.TCK := shellJTAGIO.TCK
+    port.io.TMS := shellJTAGIO.TMS
+    port.io.TDI := shellJTAGIO.TDI
+    shellJTAGIO.TDO.data := port.io.TDO
+    shellJTAGIO.TDO.driven := true.B
+  }
+})

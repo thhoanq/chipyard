@@ -1,7 +1,3 @@
-#include "mmio.h"
-
-#include "../timer/mytimer.h"
-#include "../soft_cipher/klein64.h"
 
 #define KLEIN_TRIGGER   0x10006000
 #define KLEIN_DATA_A    0x10006004
@@ -59,7 +55,7 @@ void klein_test(void)
   block_1 = klein_read_to_address(KLEIN_ADDR_RESULT0);
   block_2 = klein_read_to_address(KLEIN_ADDR_RESULT1);
 
-  kprintf("\r# KLEIN-64 - Cipher and Decipher ============================================\r\n");
+  kprintf("\r# KLEIN-64 - Cipher and Decipher ====================================\r\n");
   kprintf("\rBlock:    deadbeeff000000f\r\n");
   kprintf("\rKey:      1234567890abcdef\r\n");
   kprintf("\rCipher:   %w%w\r\n", block_1, block_2);

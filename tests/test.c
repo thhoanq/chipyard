@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include "mmio.h"
 
-#include "accel_klein.h"
+//#include "accel_klein.h"
 #include "accel_blake2s.h"
-#include "accel_chacha.h"
-#include "accel_present.h"
-#include "accel_dmpresent.h"
+//#include "accel_chacha.h"
+//#include "accel_present.h"
+//#include "accel_dmpresent.h"
 
 
 int main(void) {
@@ -22,26 +22,26 @@ int main(void) {
   printf("\nRISC-V program started, hello there!\n\n");
 
   // test klein
-  klein_test();
+//  klein_test();
 
   // ChaCha dev here <======================================
-  printf("\n--------------------------------------\n");
-  chacha_soft_reset();
-  printf("ChaCha NAME0: 0x%08x\n", chacha_read_from_address(0x00));
-  printf("ChaCha NAME1: 0x%08x\n", chacha_read_from_address(0x01));
-  printf("ChaCha INFO:  0x%08x\n\n", chacha_read_from_address(0x02));
-  chacha_test_cases();
+//  printf("\n--------------------------------------\n");
+//  chacha_soft_reset();
+//  printf("ChaCha NAME0: 0x%08x\n", chacha_read_from_address(0x00));
+//  printf("ChaCha NAME1: 0x%08x\n", chacha_read_from_address(0x01));
+//  printf("ChaCha INFO:  0x%08x\n\n", chacha_read_from_address(0x02));
+//  chacha_test_cases();
 
   // PRESENT dev here <======================================
-  printf("\n--------------------------------------\n");
-  present_soft_reset();
-  present_test_cases();
+//  printf("\n--------------------------------------\n");
+//  present_soft_reset();
+//  present_test_cases();
 
 
   // DM-PRESENT dev here <===================================
-  printf("\n--------------------------------------\n");
-  dmpresent_soft_reset();
-  dmpresent_test_cases();
+//  printf("\n--------------------------------------\n");
+//  dmpresent_soft_reset();
+//  dmpresent_test_cases();
 
   // test blake2s
   blake2s_test_empty_message();
